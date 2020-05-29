@@ -1,0 +1,11 @@
+<launch>
+	<node name="dsl_grid2d" pkg="dsl_gridsearch" type="dsl_grid2d_node" output="screen" launch-prefix="valgrind">
+		<param name="mesh_filename" type="string" value="$(find dsl_gridsearch)/data/hackerman2.stl"/>
+		<param name="use_textured_mesh" type="bool" value="true"/>
+		<param name="cells_per_meter" type="double" value="1.0"/>
+		<!--<param name="grid_length" type="int" value="100"/>
+		<param name="grid_width" type="int" value="100"/>
+		<param name="grid_ymin" type="double" value="-50"/>
+		<param name="grid_xmin" type="double" value="-50"/>-->
+	</node>
+</launch>

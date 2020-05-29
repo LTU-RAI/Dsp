@@ -1,0 +1,4 @@
+<launch>
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find dsl_gridsearch)/launch/dslviz2d.rviz" required="true" />
+
+</launch>

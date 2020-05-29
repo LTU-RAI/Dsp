@@ -1,4 +1,4 @@
-# DSL GridSearch: D*-lite on a uniformly spaced 3D or 2D grid
+# DSL GridSearch: D*-lite on a uniformly spaced 3D or 2D grid integrated with Octomap
 
 This is an implementation of D*-lite graph search on a uniformly spaced 3D or 2D grid for use in global path planning.  This package provides the ability to create an occupancy grid from a .stl mesh or to specify a grid of a given size.  The user can specify start and goal positions by publishing to the relevant topics, and the generated paths will be published by the node.  The user can also publish messages to set grid cells to be occupied or unoccupied, or mesh messages can be sent to set all cells which intersect with the mesh as occupied.  The 2D version is implemented as a traversability map, where the cost of an edge is equal to the height gradient between two grid cells.
 

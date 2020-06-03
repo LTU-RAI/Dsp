@@ -118,3 +118,45 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `grid_xmin`: [int] The world frame x value corresponding to the first cell of the grid.
 * `grid_ymin`: [int] The world frame y value corresponding to the first cell of the grid.
 
+## Issues
+
+Error 1:
+
+	REQUIRED PACKAGE NOT FOUND
+	DSL_INCLUDE_DIR=/usr/include
+	DSL_LIBRARY=<not found>
+
+FIX: 
+
+	cd 
+	git clone https://github.com/jhu-asco/dsl.git
+	cd dsl
+	git checkout 61cf588668309e87de209cd95f03a0f792a16c33
+	mkdir build
+	cd build
+	cmake ..
+	sudo make install
+
+Error 2: 
+
+	Errors 	<< dsl_gridsearch:make /home/anton/ros_workspaces/temp_ws/logs/dsl_gridsearch/build.make.002.log
+	/usr/bin/ld: /home/anton/ros_workspaces/temp_ws/src/dsl_gridsearch/extern/trimesh/bin/libtrimesh.a(TriMesh_grid.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a PIE object; recompile with -fPIC
+
+FIX:
+
+	git clone https://github.com/Forceflow/trimesh2.git
+	cd trimesh2/
+	sudo make
+	Then: copy libtirmesh.a from “trimesh2/lib.Linux64” to “dsl_gridsearch/extern/trimesh/bin”
+	 And
+	Copy “trimesh2/include” to “dsl_gridsearch/extern/trimesh/include/trimesh2”
+
+Error 3:
+
+	[dsl_grid3d-1] process has died 
+
+FIX:
+
+	cd data 
+	tar -zxvf hackerman2.tar.gz
+

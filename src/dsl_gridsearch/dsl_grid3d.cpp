@@ -147,6 +147,14 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 10,
     &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
 
+/*    std::cout << "setGoal1: " << setGoal << std::endl;
+    setGoal = ros::topic::waitForMessage<geometry_msgs::Point>("/dsl_grid3d/set_goal", nh_);
+    if(setGoal != NULL) {
+	  std::cout << "setGoal2: " << setGoal << std::endl;
+      get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 10, &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
+	  std::cout << "setGoal3: " << setGoal << std::endl;
+    }*/
+
   //timer = nh_private_.createTimer(ros::Duration(0.1), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
 }
@@ -258,7 +266,8 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
  
   ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
   Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
-  gdsl_->SetStart(pos);
+  gdsl_->SetStart(pos); 
+//  gdsl_->SetStart(wpos);
 
   planAllPaths();
   publishAllPaths();
@@ -278,13 +287,15 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
   Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
   ROS_INFO("Set dsl goal pos: %f %f %f", pos(0), pos(1), pos(2));
   gdsl_->SetGoal(pos);
+//  gdsl_->SetGoal(wpos);
 
   planAllPaths();
   publishAllPaths();
 }
 void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 {
-  Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
+//  Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
+  Eigen::Vector3d wpos(msg->x/res, msg->y/res, msg->z/res);
 
   if(!isPosInBounds(wpos))
   {
@@ -295,6 +306,7 @@ void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
   Eigen::Vector3i gpos = ogrid_->positionToGrid(wpos);
   ogrid_->setOccupied(wpos, true);
   gdsl_->SetCost(ogrid_->positionToDslPosition(wpos), DSL_OCCUPIED);
+//  gdsl_->SetCost(wpos, DSL_OCCUPIED);
 
   std::cout << "Set Occupied pos: " << wpos.transpose() << std::endl;
 
@@ -304,7 +316,8 @@ void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 }
 void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 {
-  Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
+//  Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
+  Eigen::Vector3d wpos(msg->x/res, msg->y/res, msg->z/res);
 
   if(!isPosInBounds(wpos))
   {
@@ -315,6 +328,7 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
   Eigen::Vector3i gpos = ogrid_->positionToGrid(wpos);
   ogrid_->setOccupied(wpos, false);
   gdsl_->SetCost(ogrid_->positionToDslPosition(wpos), 0);
+//  gdsl_->SetCost(wpos, 0);
 
   std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
 
@@ -325,7 +339,7 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 
 void DslGrid3D::handleAddMesh(const shape_msgs::MeshConstPtr& msg)
 {
-  OccupancyGrid* new_ogrid;
+/*  OccupancyGrid* new_ogrid;
   MeshUtility::meshToOccupancyGrid(msg, cells_per_meter_, &new_ogrid);
   //ogrid_->mergeGrid(new_ogrid);
   for(int x = 0; x < new_ogrid->getLength(); x++)
@@ -348,7 +362,7 @@ void DslGrid3D::handleAddMesh(const shape_msgs::MeshConstPtr& msg)
       }
     }
   }
-  delete new_ogrid; 
+  delete new_ogrid; */
 }
 
 bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)
@@ -380,7 +394,7 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)
   std::vector<Eigen::Vector3d>  path;
   for(int i = 0; i < dsl_path.cells.size(); i++)
   {
-    path.push_back(dsl_path.cells[i].c);
+    path.push_back(dsl_path.cells[i].c * res); //* res
   }
   return dslPathToRosMsg(path);
 }
@@ -388,11 +402,11 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
 {
   nav_msgs::Path msg;  
   
-  msg.header.frame_id = "/world";
+  msg.header.frame_id = "/velodyne"; ///world
   msg.poses.resize(dsl_path.size());
-  double xmin = ogrid_->getPmin()(0);
-  double ymin = ogrid_->getPmin()(1);
-  double zmin = ogrid_->getPmin()(2);
+  double xmin = ogrid_->getPmin()(0) * res;
+  double ymin = ogrid_->getPmin()(1) * res;
+  double zmin = ogrid_->getPmin()(2) * res;
   for(int i = 0; i < dsl_path.size(); i++)
   {
     msg.poses[i].pose.position.x = dsl_path[i][0] + xmin;//0.5;
@@ -404,7 +418,7 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
 
 void DslGrid3D::publishMesh()
 {
-  visualization_msgs::Marker marker;
+  /*visualization_msgs::Marker marker;
   marker.header.frame_id = "/world";
   marker.header.stamp = ros::Time();
   marker.ns = "dsl_grid3d";
@@ -445,7 +459,7 @@ void DslGrid3D::publishMesh()
     marker.mesh_resource = std::string("file://") + std::string(mesh_filename_);
   }
 
-  mesh_marker_pub_.publish( marker );
+  mesh_marker_pub_.publish( marker );*/
 }
 
 void DslGrid3D::publishOccupancyGrid()
@@ -468,31 +482,31 @@ void DslGrid3D::publishOccupancyGrid()
         {
           //std::cout << "pt occupied: " << x << " " << y << " " << z << std::endl;
           geometry_msgs::Point pt;
-          pt.x = x/cells_per_meter_;
-          pt.y = y/cells_per_meter_;
-          pt.z = z/cells_per_meter_;
+          pt.x = x/cells_per_meter_ * res;
+          pt.y = y/cells_per_meter_ * res;
+          pt.z = z/cells_per_meter_ * res;
           marker_pos.push_back(pt);
         }
       }  
     }
   }
 
-  occmap_viz.header.frame_id = "/world";
+  occmap_viz.header.frame_id = "/velodyne"; ///world
   occmap_viz.header.stamp = ros::Time();
   occmap_viz.ns = "dsl_grid3d";
   occmap_viz.id = 1;
   occmap_viz.type = visualization_msgs::Marker::CUBE_LIST;
   occmap_viz.action = visualization_msgs::Marker::ADD;
-  occmap_viz.pose.position.x = 1.0/(2.*cells_per_meter_) + ogrid_->getPmin()(0);
-  occmap_viz.pose.position.y = 1.0/(2.*cells_per_meter_) + ogrid_->getPmin()(1);
-  occmap_viz.pose.position.z = 1.0/(2.*cells_per_meter_) + ogrid_->getPmin()(2);
+  occmap_viz.pose.position.x = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(0) * res + res/2;
+  occmap_viz.pose.position.y = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(1) * res + res/2;
+  occmap_viz.pose.position.z = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(2) * res + res/2;
   occmap_viz.pose.orientation.x = 0.0;
   occmap_viz.pose.orientation.y = 0.0;
   occmap_viz.pose.orientation.z = 0.0;
   occmap_viz.pose.orientation.w = 1.0;
-  occmap_viz.scale.x = 1.0/cells_per_meter_;
-  occmap_viz.scale.y = 1.0/cells_per_meter_;
-  occmap_viz.scale.z = 1.0/cells_per_meter_;
+  occmap_viz.scale.x = 1.0/cells_per_meter_ * res;
+  occmap_viz.scale.y = 1.0/cells_per_meter_ * res;
+  occmap_viz.scale.z = 1.0/cells_per_meter_ * res;
   occmap_viz.color.a = 0.5;
   occmap_viz.color.r = 1.0;
   occmap_viz.color.g = 0.0;

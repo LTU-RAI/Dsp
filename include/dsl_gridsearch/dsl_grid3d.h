@@ -45,6 +45,8 @@ private:
   nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
   bool isPosInBounds(const Eigen::Vector3d& pos);
 
+  boost::shared_ptr<geometry_msgs::Point const> setGoal;
+
   dsl::Grid3d* grid_;
   dsl::GridCost<3> cost_;
   dsl::Grid3dConnectivity* connectivity_;

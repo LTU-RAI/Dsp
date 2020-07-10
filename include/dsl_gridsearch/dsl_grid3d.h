@@ -3,8 +3,8 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
-#include <shape_msgs/Mesh.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/Odometry.h>
 
 #include "dsl/gridsearch.h"
 #include "dsl/gridcost.h"
@@ -29,22 +29,20 @@ public:
 
 private:
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
+  void handleSetStartOdom(const nav_msgs::Odometry msg);
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
-  void handleAddMesh(const shape_msgs::MeshConstPtr& msg);
   void spin(const ros::TimerEvent& e);
   void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
 
   void publishAllPaths();
-  void publishMesh();
   void publishOccupancyGrid();
 
   void planAllPaths();
   nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path);
   nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
   bool isPosInBounds(const Eigen::Vector3d& pos);
-
   boost::shared_ptr<geometry_msgs::Point const> setGoal;
 
   dsl::Grid3d* grid_;
@@ -59,30 +57,27 @@ private:
   ros::NodeHandle nh_private_;
 
   ros::Publisher occ_map_viz_pub_;
-  ros::Publisher mesh_marker_pub_;
   ros::Publisher path_pub_;
   ros::Publisher optpath_pub_;
   ros::Publisher splinepath_pub_;
   ros::Publisher splineoptpath_pub_;
 
   ros::Subscriber set_start_sub_;
+  ros::Subscriber set_start_odom_sub_;
   ros::Subscriber set_goal_sub_;
   ros::Subscriber set_occupied_sub_;
   ros::Subscriber set_unoccupied_sub_;
-  ros::Subscriber set_mesh_occupied_sub_;
   ros::Subscriber get_octomap_sub_;
 
   ros::Timer timer;
 
-  std::string mesh_filename_;
   double cells_per_meter_;
   double spline_step_;
-  bool use_textured_mesh_;
+  bool use_gazebo_odom_;
   int grid_length_;
   int grid_width_;
   int grid_height_;
-//  double res_given;
-  double res;
+  double res_octomap;
 };
 
 

@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  nav_msgs
   tf
   octomap_ros
   octomap_msgs
@@ -90,7 +91,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES dslviz
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs
   DEPENDS eigen system_lib
 )
 

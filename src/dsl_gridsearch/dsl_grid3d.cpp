@@ -8,6 +8,8 @@
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
 
+#include <chrono>
+
 namespace dsl_gridsearch
 {
 
@@ -56,6 +58,9 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
 void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 {	
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
     octomap::AbstractOcTree* treeptr = octomap_msgs::msgToMap(*msg);
     // This can be cast to other types. An octree seems to be appropriate for publishing
     octomap::OcTree* tree = dynamic_cast<octomap::OcTree*>(treeptr);
@@ -106,7 +111,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
       Eigen::Vector3d(xmax/res_octomap, ymax/res_octomap, zmax/res_octomap), 1);
 
     //Bound occupancy_map from top and bottom
-	for(int x = 0; x < ogrid_->getLength(); x++)
+/*	for(int x = 0; x < ogrid_->getLength(); x++)
 	{  
         for(int y = 0; y < width_metric; y++)  
 		{
@@ -122,13 +127,23 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 			//}
         }
 	}
-
+*/
 	std::cout << "Grid Bounds: " << ogrid_->getPmin().transpose() << " and " 
     << ogrid_->getPmax().transpose() << std:: endl;
 
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: Build OccupancyGrid. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 
   //Perform dsl gridsearch3D
+  high_resolution_clock::time_point t3 = high_resolution_clock::now();
+
   ROS_INFO("Building search graph...");
+/*  Grid3d(int length, int width, int height, double *map, 
+           double sx, double sy, double sz, double costScale,
+           double maxCost = 1);*/
+
   grid_ = new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
     ogrid_->getOccupancyMap(), 
     1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000);
@@ -139,8 +154,19 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 //  gdsl_->SetGoal(Eigen::Vector3d(0, 0, 0));
   ROS_INFO("Graph built");
   
+
+  high_resolution_clock::time_point t4 = high_resolution_clock::now();
+  time_span = duration_cast<duration<double>>(t4 - t3);
+  std::cout << "----LOG: Building DSL search graph. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
+
 //  publishAllPaths();
   publishOccupancyGrid();
+
+  high_resolution_clock::time_point t5 = high_resolution_clock::now();
+  time_span = duration_cast<duration<double>>(t5 - t1);
+  std::cout << "----LOG: octomap_data_callback. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
 
 void DslGrid3D::spin(const ros::TimerEvent& e)
@@ -169,6 +195,9 @@ void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 
 void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
 
   if(!isPosInBounds(wpos))
@@ -184,9 +213,18 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 
 //  planAllPaths();
 //  publishAllPaths();
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: handleSetStart. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
+
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
 
   if(!isPosInBounds(wpos))
@@ -203,6 +241,11 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 
   planAllPaths();
   publishAllPaths();
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: handleSetGoal. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
 void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 {
@@ -249,42 +292,79 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 
 bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   Eigen::Vector3d pmin = ogrid_->getPmin();
   Eigen::Vector3d pmax = ogrid_->getPmax();
   return (pos(0) >= pmin(0) && pos(1) >= pmin(1) && pos(2) >= pmin(2) && pos(0) <= pmax(0) 
     && pos(1) <= pmax(1) && pos(2) <= pmax(2));
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: isPosInBounds. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
 
 void DslGrid3D::planAllPaths()
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   gdsl_->Plan(path_);
   gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
 //  gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
 //  gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: planAllPaths. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
 
 void DslGrid3D::publishAllPaths()
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   path_pub_.publish(dslPathToRosMsg(path_));
   optpath_pub_.publish(dslPathToRosMsg(optpath_)); 
 /*  splinepath_pub_.publish(dslPathToRosMsg(splinepath_)); 
   splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_)); */
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: publishAllPaths. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
 
 nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   std::vector<Eigen::Vector3d> path;
   for(int i = 0; i < dsl_path.cells.size(); i++)
   {
     path.push_back(dsl_path.cells[i].c * res_octomap);
   }
+
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: dslPathToRosMsg1. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
+
   return dslPathToRosMsg(path);
 }
 nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path)
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   nav_msgs::Path msg;  
   
-  msg.header.frame_id = "/pixy/velodyne"; ///world
+  msg.header.frame_id = "odom"; ///world /pixy/velodyne
   msg.poses.resize(dsl_path.size());
   double xmin = ogrid_->getPmin()(0) * res_octomap;
   double ymin = ogrid_->getPmin()(1) * res_octomap;
@@ -295,11 +375,20 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
     msg.poses[i].pose.position.y = dsl_path[i][1] + ymin;//0.5;
     msg.poses[i].pose.position.z = dsl_path[i][2] + zmin;//0.5;
   }
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: dslPathToRosMsg2. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
+
   return msg; 
 }
 
 void DslGrid3D::publishOccupancyGrid()
 {
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   visualization_msgs::Marker occmap_viz;
 
   std::vector<geometry_msgs::Point> marker_pos;
@@ -327,7 +416,7 @@ void DslGrid3D::publishOccupancyGrid()
     }
   }
 
-  occmap_viz.header.frame_id = "/pixy/velodyne"; ///world
+  occmap_viz.header.frame_id = "odom"; ///world /pixy/velodyne
   occmap_viz.header.stamp = ros::Time();
   occmap_viz.ns = "dsl_grid3d";
   occmap_viz.id = 1;
@@ -350,6 +439,11 @@ void DslGrid3D::publishOccupancyGrid()
   occmap_viz.points = marker_pos;
 
   occ_map_viz_pub_.publish(occmap_viz);
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: publishOccupancyGrid. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
 }
 
 } // namespace

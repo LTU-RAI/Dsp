@@ -1,0 +1,352 @@
+%CPU %MEM ARGS fre 10 jul 2020 10:11:03 CEST
+ 0.5  0.0 [kworker/u16:4-e]
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.2  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:04 CEST
+ 0.5  0.0 [kworker/u16:4-e]
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.2  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:05 CEST
+ 0.5  0.0 [kworker/u16:4-e]
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.2  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:06 CEST
+ 0.5  0.0 [kworker/u16:4-e]
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.2  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:07 CEST
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.2  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+68.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+%CPU %MEM ARGS fre 10 jul 2020 10:11:08 CEST
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 2.5  0.1 /opt/ros/melodic/lib/tf/static_transform_publisher
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+63.0  0.2 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+%CPU %MEM ARGS fre 10 jul 2020 10:11:09 CEST
+ 2.0  0.1 /opt/ros/melodic/lib/tf/static_transform_publisher
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+17.2  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+18.5  1.7 /usr/bin/gnome-shell
+20.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+75.6  0.3 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+%CPU %MEM ARGS fre 10 jul 2020 10:11:10 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+13.8  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+16.8  1.0 rviz
+17.0  0.3 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+33.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+57.0  0.3 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+%CPU %MEM ARGS fre 10 jul 2020 10:11:11 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+11.6  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+19.0  0.5 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+22.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+46.4  0.3 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+%CPU %MEM ARGS fre 10 jul 2020 10:11:13 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+10.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.5  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+16.8  1.0 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+35.6  0.5 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+39.1  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+%CPU %MEM ARGS fre 10 jul 2020 10:11:14 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 8.8  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+13.4  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+34.1  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+40.2  0.6 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+%CPU %MEM ARGS fre 10 jul 2020 10:11:15 CEST
+ 7.8  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+11.1  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+30.1  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+43.0  0.6 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+48.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+%CPU %MEM ARGS fre 10 jul 2020 10:11:16 CEST
+ 9.5  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+27.1  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+31.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+46.8  0.6 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+60.0  0.9 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:17 CEST
+ 8.5  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+21.0  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+24.6  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+49.0  0.6 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+83.5  2.4 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:18 CEST
+ 7.7  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+15.7  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+22.3  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+50.7  0.6 /opt/ros/melodic/lib/octomap_server/octomap_server_node cloud_in:=/pixy/velodyne_points
+90.0  3.9 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:19 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 5.5  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+12.6  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+20.5  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+72.2  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:20 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 5.2  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+10.6  0.3 /usr/bin/python /opt/ros/melodic/bin/roslaunch
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+19.0  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+57.8  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:21 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 4.8  0.3 /usr/bin/python
+ 9.1  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+17.7  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+48.1  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:22 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 4.6  0.3 /usr/bin/python
+ 8.0  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.5  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+41.4  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:23 CEST
+ 4.3  0.3 /usr/bin/python
+ 7.2  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+15.5  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+36.3  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+59.0  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+%CPU %MEM ARGS fre 10 jul 2020 10:11:24 CEST
+ 4.1  0.3 /usr/bin/python
+ 6.5  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+14.6  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+30.0  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+32.3  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:25 CEST
+ 4.0  0.3 /usr/bin/python
+ 6.0  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+13.8  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+20.3  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+29.1  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+%CPU %MEM ARGS fre 10 jul 2020 10:11:26 CEST
+ 3.8  0.3 /usr/bin/python
+ 5.5  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+13.1  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+26.6  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+58.0  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+%CPU %MEM ARGS fre 10 jul 2020 10:11:27 CEST
+ 3.6  0.3 /usr/bin/python
+ 5.0  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+12.4  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+26.5  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+29.5  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+%CPU %MEM ARGS fre 10 jul 2020 10:11:28 CEST
+ 3.3  0.3 /usr/bin/python
+ 4.4  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+11.3  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+15.0  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+22.7  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:29 CEST
+ 3.2  0.3 /usr/bin/python
+ 4.1  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+10.8  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+12.4  0.3 /usr/bin/python2 /opt/ros/melodic/bin/rostopic
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+21.2  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:30 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 3.1  0.3 /usr/bin/python
+ 3.9  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+10.4  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+19.9  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:31 CEST
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 3.0  0.3 /usr/bin/python
+ 3.7  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+10.0  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher __name:=ply_publisher
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+18.8  4.2 /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:33 CEST
+ 1.3  0.1 /opt/ros/melodic/lib/tf/static_transform_publisher
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 2.9  0.3 /usr/bin/python
+ 9.6  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:34 CEST
+ 1.2  0.1 /opt/ros/melodic/lib/tf/static_transform_publisher
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 2.8  0.3 /usr/bin/python
+ 9.3  0.4 /home/anton/ros_workspaces/release_ws/devel/lib/ply_publisher/ply_publisher
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:35 CEST
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 3.1  0.3 /usr/bin/python
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2
+%CPU %MEM ARGS fre 10 jul 2020 10:11:36 CEST
+ 0.6  0.3 /usr/bin/python
+ 0.7  0.0 /usr/lib/bluetooth/bluetoothd
+ 0.8  0.4 /usr/bin/nautilus
+ 1.4  0.4 /usr/bin/python
+ 2.3  1.2 /usr/lib/firefox/firefox
+ 9.7  0.6 gedit
+12.1  2.9 /usr/lib/firefox/firefox -new-window
+16.8  0.9 rviz
+18.5  1.7 /usr/bin/gnome-shell
+23.2  1.2 /usr/lib/xorg/Xorg vt2

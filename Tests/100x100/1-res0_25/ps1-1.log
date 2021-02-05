@@ -1,0 +1,36 @@
+roslaunch dsl_gridsearch dsl_grid3d_campus.launch 
+... logging to /home/anton/.ros/log/45cfddf6-c276-11ea-a48f-e86a64a918be/roslaunch-anton-ThinkPad-T480-16823.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://anton-ThinkPad-T480:45429/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /dsl_grid3d/cells_per_meter: 1.0
+ * /dsl_grid3d/use_gazebo_odom: False
+ * /rosdistro: melodic
+ * /rosversion: 1.14.6
+
+NODES
+  /
+    dsl_grid3d (dsl_gridsearch/dsl_grid3d_node)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[dsl_grid3d-1]: started with pid [16850]
+resolution: 0.25
+type: OcTree
+size: 842152
+Metric size. length: 400 width: 400 height: 21
+count: 687664
+[dsl_grid3d-1] process has died [pid 16850, exit code -11, cmd /home/anton/ros_workspaces/release_ws/devel/lib/dsl_gridsearch/dsl_grid3d_node __name:=dsl_grid3d __log:=/home/anton/.ros/log/45cfddf6-c276-11ea-a48f-e86a64a918be/dsl_grid3d-1.log].
+log file: /home/anton/.ros/log/45cfddf6-c276-11ea-a48f-e86a64a918be/dsl_grid3d-1*.log
+all processes on machine have died, roslaunch will exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+done
+

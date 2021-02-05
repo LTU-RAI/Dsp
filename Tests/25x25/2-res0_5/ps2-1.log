@@ -1,0 +1,79 @@
+roslaunch dsl_gridsearch dsl_grid3d_campus.launch 
+... logging to /home/anton/.ros/log/45cfddf6-c276-11ea-a48f-e86a64a918be/roslaunch-anton-ThinkPad-T480-11488.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://anton-ThinkPad-T480:35175/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /dsl_grid3d/cells_per_meter: 1.0
+ * /dsl_grid3d/use_gazebo_odom: False
+ * /rosdistro: melodic
+ * /rosversion: 1.14.6
+
+NODES
+  /
+    dsl_grid3d (dsl_gridsearch/dsl_grid3d_node)
+
+ROS_MASTER_URI=http://localhost:11311
+
+process[dsl_grid3d-1]: started with pid [11509]
+resolution: 0.5
+type: OcTree
+size: 14386
+Metric size. length: 52 width: 52 height: 12
+count: 11305
+Grid Bounds: -26 -26  -6 and 26 26  6
+----LOG: Build OccupancyGrid. It took me 0.0107377 seconds.
+[ INFO] [1594368675.634774993]: Building search graph...
+ogrid_->getOccupancyMap(): 0x556e9affaf40
+[ INFO] [1594368676.586364524]: Graph built
+----LOG: Building DSL search graph. It took me 0.952274 seconds.
+----LOG: publishOccupancyGrid. It took me 0.000545956 seconds.
+----LOG: octomap_data_callback. It took me 0.963614 seconds.
+resolution: 0.5
+type: OcTree
+size: 14386
+Metric size. length: 52 width: 52 height: 12
+count: 11305
+Grid Bounds: -26 -26  -6 and 26 26  6
+----LOG: Build OccupancyGrid. It took me 0.00300622 seconds.
+[ INFO] [1594368676.590008526]: Building search graph...
+ogrid_->getOccupancyMap(): 0x556ea8853cf0
+[ INFO] [1594368677.567513390]: Graph built
+----LOG: Building DSL search graph. It took me 0.977724 seconds.
+----LOG: publishOccupancyGrid. It took me 0.000774971 seconds.
+----LOG: octomap_data_callback. It took me 0.981576 seconds.
+resolution: 0.5
+type: OcTree
+size: 14386
+Metric size. length: 52 width: 52 height: 12
+count: 11305
+Grid Bounds: -26 -26  -6 and 26 26  6
+----LOG: Build OccupancyGrid. It took me 0.00345471 seconds.
+[ INFO] [1594368677.572048047]: Building search graph...
+ogrid_->getOccupancyMap(): 0x556eb60abda0
+[ INFO] [1594368678.457990315]: Graph built
+----LOG: Building DSL search graph. It took me 0.886063 seconds.
+----LOG: publishOccupancyGrid. It took me 0.00186621 seconds.
+----LOG: octomap_data_callback. It took me 0.891525 seconds.
+[ INFO] [1594368683.451963114]: Set start pos: 0.000000 0.000000 0.000000
+----LOG: handleSetStart. It took me 0.000492963 seconds.
+[ INFO] [1594368686.859285645]: Set goal pos: 18.000000 -22.000000 0.000000
+[ INFO] [1594368686.859378961]: Set dsl goal pos: 44.000000 4.000000 6.000000
+----LOG: planAllPaths. It took me 0.252813 seconds.
+----LOG: dslPathToRosMsg1. It took me 6.47e-06 seconds.
+----LOG: dslPathToRosMsg2. It took me 5.509e-06 seconds.
+----LOG: dslPathToRosMsg1. It took me 1.386e-06 seconds.
+----LOG: dslPathToRosMsg2. It took me 1.137e-06 seconds.
+----LOG: publishAllPaths. It took me 6.6309e-05 seconds.
+----LOG: handleSetGoal. It took me 0.255544 seconds.
+^C[dsl_grid3d-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+done
+

@@ -13,11 +13,12 @@
 #include "dsl_gridsearch/occupancy_grid.h"
 
 
-#include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <octomap_msgs/Octomap.h>
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
+
+#include <memory>
 
 namespace dsl_gridsearch
 {
@@ -32,7 +33,7 @@ private:
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
-  void handleAddMesh(const shape_msgs::MeshConstPtr& msg);
+  //void handleAddMesh(const shape_msgs::MeshConstPtr& msg);
   void spin(const ros::TimerEvent& e);
   void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
 
@@ -45,13 +46,13 @@ private:
   nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
   bool isPosInBounds(const Eigen::Vector3d& pos);
 
-  dsl::Grid3d* grid_;
+  //dsl::Grid3d* grid_;
   dsl::GridCost<3> cost_;
-  dsl::Grid3dConnectivity* connectivity_;
-  dsl::GridSearch<3>* gdsl_;
+  //dsl::Grid3dConnectivity* connectivity_;
+  std::shared_ptr<dsl::GridSearch<3>> gdsl_;
   dsl::GridPath<3> path_, optpath_, splinecells_, splineoptcells_;
   std::vector<Eigen::Vector3d> splinepath_, splineoptpath_;
-  OccupancyGrid* ogrid_;
+  std::shared_ptr<OccupancyGrid> ogrid_;
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;

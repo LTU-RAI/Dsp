@@ -4,6 +4,8 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+#include <memory>
+
 #define DSL_OCCUPIED 1e10
 
 
@@ -13,7 +15,7 @@ namespace dsl_gridsearch
 class OccupancyGrid
 {
 public:
-  OccupancyGrid(double* occupancy_map, int length, int width, int height, Eigen::Vector3d pmin, Eigen::Vector3d pmax, double scale);
+  OccupancyGrid(std::shared_ptr<double[]> occupancy_map, int length, int width, int height, Eigen::Vector3d pmin, Eigen::Vector3d pmax, double scale);
   OccupancyGrid(int length, int width, int height, Eigen::Vector3d pmin, Eigen::Vector3d pmax, double scale, double default_val = 0);
   ~OccupancyGrid();
 
@@ -36,10 +38,10 @@ public:
   int getLength();
   int getWidth();
   int getHeight();
-  double* getOccupancyMap();
+  std::shared_ptr<double[]> getOccupancyMap();
 
 private:
-  double* occupancy_map_;
+  std::shared_ptr<double[]> occupancy_map_;
   int length_;
   int width_;
   int height_; 

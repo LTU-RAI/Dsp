@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
 	<node name="dsl_grid3d" pkg="dsl_gridsearch" type="dsl_grid3d_node" output="screen">
 		<param name="mesh_filename" type="string" value=""/>

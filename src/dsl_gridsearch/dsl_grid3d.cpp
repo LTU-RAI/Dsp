@@ -39,99 +39,12 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     grid_ymin = 0;
   if (!nh_private_.getParam ("grid_zmin", grid_zmin))
     grid_zmin = 0;
-//  if (!nh_private_.getParam ("resolution", res_given))
-//    res_given = 0.1; //0.05
 
-/*  if(grid_height_ <= 0 || grid_length_ <= 0 || grid_width_ <= 0)
-  {
-    if(mesh_filename_ == "")
-    { 
-      ROS_ERROR("Must specify grid bounds if no mesh is specified");
-      return;
-    }
-
-    ROS_INFO("Loading occupancy map from mesh file: %s", mesh_filename_.c_str());
-    MeshUtility::meshToOccupancyGrid(mesh_filename_, cells_per_meter_, &ogrid_);
-    ROS_INFO("Loaded succesfully");
-
-    mesh_marker_pub_ = nh_.advertise<visualization_msgs::Marker>( "/dsl_grid3d/mesh",  0);
-  }
-  else
-  {
-    ROS_INFO("Loading blank occupancy map with dimensions: %d %d %d", grid_length_, grid_width_, 
-      grid_height_);
-    ogrid_ = new OccupancyGrid(grid_length_, grid_width_, grid_height_, 
-                               Eigen::Vector3d(grid_xmin, grid_ymin, grid_zmin), 
-                               Eigen::Vector3d(grid_length_/cells_per_meter_+grid_xmin, 
-                                 grid_width_/cells_per_meter_+grid_ymin, 
-                                 grid_height_/cells_per_meter_+grid_zmin), 
-                               cells_per_meter_);
-  }
-
-  std::cout << "Grid Bounds: " << ogrid_->getPmin().transpose() << " and " 
-    << ogrid_->getPmax().transpose() << std:: endl;
-*/
   occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "/dsl_grid3d/occupancy_map",  0);
   path_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/path",  0);
   optpath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/optpath",  0);
   splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splinepath",  0);
   splineoptpath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splineoptpath",  0);
-
-  //Perform dsl gridsearch3D
-/*  ROS_INFO("Building search graph...");
-  grid_ = new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
-    ogrid_->getOccupancyMap(), 
-    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000);
-  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
-  connectivity_ = new dsl::Grid3dConnectivity(*grid_);
-  gdsl_ = new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true);
-  gdsl_->SetStart(Eigen::Vector3d(0, 0, 0));
-  gdsl_->SetGoal(Eigen::Vector3d(0, 0, 0));
-  ROS_INFO("Graph built");
-
-  if(grid_length_ > 0 && grid_width_ > 0 && grid_height_ > 0)
-  {
-    if(mesh_filename_ != "")
-    {
-      OccupancyGrid* mesh_grid;
-      ROS_INFO("Adding mesh to occupancy map from: %s", mesh_filename_.c_str());
-      MeshUtility::meshToOccupancyGrid(mesh_filename_, cells_per_meter_, &mesh_grid);
-      ROS_INFO("Loaded succesfully");
-
-      for(int x = 0; x < mesh_grid->getLength(); x++)
-      {  
-        for(int y = 0; y < mesh_grid->getWidth(); y++)  
-        {
-          for(int z = 0; z < mesh_grid->getHeight(); z++)  
-          {
-            Eigen::Vector3i gp(x,y,z);
-            if(mesh_grid->isOccupied(gp))
-            {
-              Eigen::Vector3d wp = mesh_grid->gridToPosition(gp);
-              if(gdsl_->SetCost(ogrid_->positionToDslPosition(wp), DSL_OCCUPIED)); 
-              { 
-                ogrid_->setOccupied(wp, true);
-              }
-            }
-          }
-        }
-      }
-      delete mesh_grid;
-
-      mesh_marker_pub_ = nh_.advertise<visualization_msgs::Marker>( "/dsl_grid3d/mesh",  0);
-    }
-  } 
-
-  publishAllPaths();
-  publishOccupancyGrid();
-  if(mesh_filename_ != "")
-  {
-    ros::Duration(0.5).sleep();
-    publishMesh();
-  }
-
-  ROS_INFO("Published occupancy grid");
-*/
 
   set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_start", 10, 
     &DslGrid3D::handleSetStart, this, ros::TransportHints().tcpNoDelay());
@@ -141,53 +54,41 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     &DslGrid3D::handleSetOccupied, this, ros::TransportHints().tcpNoDelay());
   set_unoccupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_unoccupied", 10, 
     &DslGrid3D::handleSetUnoccupied, this, ros::TransportHints().tcpNoDelay());
-  //set_mesh_occupied_sub_ = nh_.subscribe<shape_msgs::Mesh>("/dsl_grid3d/set_mesh_occupied", 10, 
-  //  &DslGrid3D::handleAddMesh, this, ros::TransportHints().tcpNoDelay());
 
   get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 10,
     &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
 
-  //timer = nh_private_.createTimer(ros::Duration(0.1), &DslGrid3D::spin, this);
+  timer = nh_private_.createTimer(ros::Duration(5.0), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
 }
 
 void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 {	
-//	octomap_msgs::Octomap octomap_data(*msg);
-//	octomap::OcTree* tree = octomap_msgs::binaryMsgToMap(octomap_data);
 
     // This can be cast to other types. An octree seems to be appropriate for publishing
     std::unique_ptr<octomap::OcTree> tree(dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg)));
-    //octomap::OcTree* tree = dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg));
 	std::cout << "resolution: " << tree->getResolution() << std::endl;
 	std::cout << "type: " << tree->getTreeType() << std::endl;
 	std::cout << "size: " << tree->size() << std::endl;
 
-//    double res = tree->getResolution();
     res = tree->getResolution();
-	double length,width,height, xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
+    double length,width,height, xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
     tree->getMetricSize(length,width,height);
     tree->getMetricMin(xmin, ymin, zmin);
     tree->getMetricMax(xmax, ymax, zmax);
 
     std::cout << "Metric size. length: " << length/res << " width: " << width/res << " height: " << height/res << std::endl;
-	int length_metric = length/res;
-	int width_metric = width/res;
-	int height_metric = height/res;
+    int length_metric = length/res;
+    int width_metric = width/res;
+    int height_metric = height/res;
 
-    const double occupied_val = DSL_OCCUPIED;
     int count = 0;
-	std::shared_ptr<double[]> occupancy_map(new double[length_metric*width_metric*height_metric]);
+    std::shared_ptr<double[]> occupancy_map(new double[length_metric*width_metric*height_metric]);
         
-    /*if(!occupancy_map)
-    {
-   	 std::cout << "Failed to malloc occupancy map" << std::endl;
-   	 return false;
-  	}*/
 
    for(int i = 0; i < length_metric * width_metric*height_metric; i++)
    {
-     occupancy_map[i] = 0; //occupied_val;
+     occupancy_map[i] = 0; 
    }
 
    for(octomap::OcTree::leaf_iterator it = tree->begin_leafs(), end = tree->end_leafs(); it != end; ++it)
@@ -203,43 +104,44 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 			int idx = x + y*length_metric + z*length_metric*width_metric;
 			assert(!(idx >= length_metric*width_metric*height_metric || idx < 0));
 //				std::cout << "idx: " << idx << std::endl;
-			occupancy_map[idx] = occupied_val;
+			occupancy_map[idx] = DSL_OCCUPIED;
 		}			
     }
 	std::cout << "count: " << count << std::endl;
 	ogrid_.reset(new OccupancyGrid(occupancy_map, length_metric, width_metric, height_metric, Eigen::Vector3d(xmin/res, ymin/res, zmin/res), Eigen::Vector3d(xmax/res, ymax/res, zmax/res), 1));
 
-//	ogrid_ = new OccupancyGrid(occupancy_map, length, width, height, Eigen::Vector3d(xmin, ymin, zmin), Eigen::Vector3d(xmax, ymax, zmax), 1);
 
-	//publishOccupancyGrid();
 
 //-----------------------------------------
 	std::cout << "Grid Bounds: " << ogrid_->getPmin().transpose() << " and " 
     << ogrid_->getPmax().transpose() << std:: endl;
 
+//  grid_.reset(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
+//    ogrid_->getOccupancyMap().get(), 
+//    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
 
-  //Perform dsl gridsearch3D
-  ROS_INFO("Building search graph...");
-  //double* temp = &*ogrid_->getOccupancyMap();
-  std::shared_ptr<dsl::Grid3d> grid_(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
-    ogrid_->getOccupancyMap().get(), 
-    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
-  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
-  //connectivity_ = new dsl::Grid3dConnectivity(*grid_);
-  gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
-  gdsl_->SetStart(Eigen::Vector3d(0, 0, 0));
-  gdsl_->SetGoal(Eigen::Vector3d(0, 0, 0));
-  ROS_INFO("Graph built");
 
-  publishAllPaths();
   publishOccupancyGrid();
-  
+
 //-------------------------------------------------------
 
 }
 
 void DslGrid3D::spin(const ros::TimerEvent& e)
 {
+  //Perform dsl gridsearch3D
+  ROS_INFO("Building search graph...");
+  std::shared_ptr<dsl::Grid3d> grid_(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
+    ogrid_->getOccupancyMap().get(), 
+    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 100));
+//  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
+  gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
+  gdsl_->SetStart(Eigen::Vector3d(0, 0, 0));
+  gdsl_->SetGoal(Eigen::Vector3d(0, 0, 0));
+  ROS_INFO("Graph built");
+
+  //planAllPaths();
+  //publishAllPaths();
 }
 
 void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
@@ -260,6 +162,7 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
   planAllPaths();
   publishAllPaths();
 }
+
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
 //  Eigen::Vector3d wpos(msg->x/res_given, msg->y/res_given, msg->z/res_given);
@@ -319,35 +222,6 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
   planAllPaths();
   publishAllPaths();
 }
-/*
-void DslGrid3D::handleAddMesh(const shape_msgs::MeshConstPtr& msg)
-{
-  OccupancyGrid* new_ogrid;
-  MeshUtility::meshToOccupancyGrid(msg, cells_per_meter_, &new_ogrid);
-  //ogrid_->mergeGrid(new_ogrid);
-  for(int x = 0; x < new_ogrid->getLength(); x++)
-  {  
-    for(int y = 0; y < new_ogrid->getWidth(); y++)  
-    {
-      for(int z = 0; z < new_ogrid->getHeight(); z++)  
-      {
-        Eigen::Vector3i gp(x,y,z);
-        if(new_ogrid->isOccupied(gp))
-        {
-          Eigen::Vector3d wp = new_ogrid->gridToPosition(gp);
-          Eigen::Vector3i gpos = ogrid_->positionToGrid(wp);
-          if(ogrid_->isInGrid(gpos))
-          { 
-            ogrid_->setOccupied(wp, true);
-            gdsl_->SetCost(ogrid_->gridToDslPosition(gpos), DSL_OCCUPIED); 
-          }
-        }
-      }
-    }
-  }
-  delete new_ogrid; 
-}
-*/
 
 bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)
 {

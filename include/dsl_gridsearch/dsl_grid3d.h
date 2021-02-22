@@ -46,7 +46,7 @@ private:
   nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
   bool isPosInBounds(const Eigen::Vector3d& pos);
 
-  //dsl::Grid3d* grid_;
+  //std::shared_ptr<dsl::Grid3d> grid_;
   dsl::GridCost<3> cost_;
   //dsl::Grid3dConnectivity* connectivity_;
   std::shared_ptr<dsl::GridSearch<3>> gdsl_;

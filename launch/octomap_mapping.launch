@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!-- 
   Example launch file for octomap_server mapping: 
   Listens to incoming PointCloud2 data and incrementally builds an octomap. 

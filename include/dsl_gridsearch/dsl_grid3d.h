@@ -5,6 +5,7 @@
 #include <geometry_msgs/Point.h>
 #include <shape_msgs/Mesh.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/Odometry.h>
 
 #include "dsl/gridsearch.h"
 #include "dsl/gridcost.h"
@@ -30,6 +31,7 @@ public:
 
 private:
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
+  void pos_callback(const nav_msgs::OdometryConstPtr& msg);
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
@@ -65,6 +67,7 @@ private:
   ros::Publisher splineoptpath_pub_;
 
   ros::Subscriber set_start_sub_;
+  ros::Subscriber get_pos_sub_; 
   ros::Subscriber set_goal_sub_;
   ros::Subscriber set_occupied_sub_;
   ros::Subscriber set_unoccupied_sub_;
@@ -75,6 +78,7 @@ private:
 
   Eigen::Vector3d sPose;
   Eigen::Vector3d gPose;
+  Eigen::Vector3d startPose;
 
   std::string mesh_filename_;
   double cells_per_meter_;

@@ -58,11 +58,21 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 10,
     &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
 
-  timer = nh_private_.createTimer(ros::Duration(5.0), &DslGrid3D::spin, this);
+  get_pos_sub_ = nh.subscribe<nav_msgs::Odometry>("/spot/odometry", 10, 
+    &DslGrid3D::pos_callback, this, ros::TransportHints().tcpNoDelay());
+
+  //timer = nh_private_.createTimer(ros::Duration(5.0), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
   
-  sPose << 0.0, 0.0, 0.0;
-  gPose << 1.0, 1.0, 1.0;
+  //sPose << 0.0, 0.0, 0.0;
+  sPose(0) = 0.0;
+  sPose(1) = 0.0;
+  sPose(2) = 0.0;
+  gPose(0) = 1.0;
+  gPose(1) = 1.0;
+  gPose(2) = 1.0;
+    startPose(0) = 0.0;
+  //gPose << 1.0, 1.0, 1.0;
 }
 
 void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
@@ -126,6 +136,30 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 
   publishOccupancyGrid();
 
+  //Perform dsl gridsearch3D
+  ROS_INFO("Building search graph...");
+  std::shared_ptr<dsl::Grid3d> grid_(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
+    ogrid_->getOccupancyMap().get(), 
+    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
+//  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
+  gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
+  Eigen::Vector3d pose = ogrid_->positionToDslPosition(gPose);
+  Eigen::Vector3d spose = ogrid_->positionToDslPosition(sPose);
+  ROS_INFO("db pre-start pos: %f %f %f", sPose(0), sPose(1), sPose(2));
+  ROS_INFO("db start pos: %f %f %f", spose(0), spose(1), spose(2));
+  ROS_INFO("db goal pos: %f %f %f", pose(0), pose(1), pose(2));
+  //gdsl_->SetStart(ogrid_->positionToDslPosition(spose));
+   // gdsl_->SetStart(sPose);
+    //gdsl_->SetStart(spose);
+    //gdsl_->SetStart(Eigen::Vector3d(0.1,0,0));
+    gdsl_->SetStart(ogrid_->positionToDslPosition(Eigen::Vector3d((int) sPose(0), (int) sPose(1), (int) sPose(2))));
+  gdsl_->SetGoal(pose);
+  ROS_INFO("Graph built");
+
+  planAllPaths();
+  //ROS_INFO("Path planed");
+  publishAllPaths();
+
 //-------------------------------------------------------
 
 }
@@ -139,31 +173,72 @@ void DslGrid3D::spin(const ros::TimerEvent& e)
     1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
 //  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
   gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
-  ROS_INFO("Set start pos: %f %f %f", gPose(0), gPose(1), gPose(2));
-  gdsl_->SetStart(ogrid_->positionToDslPosition(sPose));
-  gdsl_->SetGoal(ogrid_->positionToDslPosition(gPose));
+  Eigen::Vector3d pose = ogrid_->positionToDslPosition(gPose);
+  Eigen::Vector3d spose = ogrid_->positionToDslPosition(sPose);
+  ROS_INFO("db pre-start pos: %f %f %f", sPose(0), sPose(1), sPose(2));
+  ROS_INFO("db start pos: %f %f %f", spose(0), spose(1), spose(2));
+  ROS_INFO("db goal pos: %f %f %f", pose(0), pose(1), pose(2));
+  //gdsl_->SetStart(ogrid_->positionToDslPosition(spose));
+   // gdsl_->SetStart(sPose);
+    //gdsl_->SetStart(spose);
+    //gdsl_->SetStart(Eigen::Vector3d(0.1,0,0));
+    gdsl_->SetStart(Eigen::Vector3d((int) spose(0), (int) spose(1), (int) spose(2)));
+  gdsl_->SetGoal(pose);
   ROS_INFO("Graph built");
 
   planAllPaths();
+  //ROS_INFO("Path planed");
   publishAllPaths();
 }
 
 void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
 //  Eigen::Vector3d wpos(msg->x/res_given, msg->y/res_given, msg->z/res_given);
-  sPose(0) = msg->x/res;
-  sPose(1) =  msg->y/res;
-  sPose(2) =  msg->z/res;
+  //sPose(0) = msg->x/res;
+  //sPose(1) =  msg->y/res;
+  //sPose(2) =  msg->z/res;
 
-  if(!isPosInBounds(sPose))
+  //if(!isPosInBounds(sPose))
+  //{
+   // ROS_WARN("handleSetStart: Position %f %f %f out of bounds!", sPose(0), sPose(1), sPose(2));
+   // return;
+  //}
+ 
+  //ROS_INFO("Set start pos: %f %f %f", sPose(0), sPose(1), sPose(2));
+  //Eigen::Vector3d pos = ogrid_->positionToDslPosition(sPose);
+  //gdsl_->SetStart(pos);
+
+  //planAllPaths();
+  //publishAllPaths();
+}
+
+void DslGrid3D::pos_callback(const nav_msgs::OdometryConstPtr& msg)
+{
+    if(startPose(0) == 0.0)
+    {
+        std::cout<<"startPose"<<std::endl;
+        startPose(0) = msg->pose.pose.position.x / res;
+        startPose(1) = msg->pose.pose.position.y / res;
+        startPose(2) = 0; //msg->pose.pose.position.z / res;
+    
+    }
+   Eigen::Vector3d wpos(msg->pose.pose.position.x / res - startPose(0), 
+        msg->pose.pose.position.y / res - startPose(1), 0); 
+
+  ROS_INFO("Set start wpos: %f %f %f", wpos(0), wpos(1), wpos(2));
+  if(!isPosInBounds(wpos))
   {
-    ROS_WARN("handleSetStart: Position %f %f %f out of bounds!", sPose(0), sPose(1), sPose(2));
+    ROS_WARN("handleSetStart: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
     return;
   }
- 
+    sPose(0) = msg->pose.pose.position.x / res - startPose(0);
+    sPose(1) = msg->pose.pose.position.y / res - startPose(1);
+    sPose(2) = 0; //msg->pose.pose.position.z / res - startPose(2);
+    //sPose = wpos;
+    
   ROS_INFO("Set start pos: %f %f %f", sPose(0), sPose(1), sPose(2));
-  Eigen::Vector3d pos = ogrid_->positionToDslPosition(sPose);
-  gdsl_->SetStart(pos);
+  //Eigen::Vector3d pos = ogrid_->positionToDslPosition(sPose);
+  //gdsl_->SetStart(pos);
 
   //planAllPaths();
   //publishAllPaths();
@@ -171,16 +246,16 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
-//  Eigen::Vector3d wpos(msg->x/res_given, msg->y/res_given, msg->z/res_given);
-  gPose(0) = msg->x/res;
-  gPose(1) =  msg->y/res;
-  gPose(2) =  msg->z/res;
+  Eigen::Vector3d wpos(msg->x/res - startPose(0), msg->y/res - startPose(1), msg->z/res - startPose(2));
 
   if(!isPosInBounds(gPose))
   {
-    ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", gPose(0), gPose(1), gPose(2));
+    ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
     return;
   } 
+  gPose(0) = msg->x/res - startPose(0);
+  gPose(1) =  msg->y/res - startPose(1);
+  gPose(2) =  msg->z/res - startPose(2);
 
   ROS_INFO("Set goal pos: %f %f %f", gPose(0), gPose(1), gPose(2));
   Eigen::Vector3d pos = ogrid_->positionToDslPosition(gPose);
@@ -207,8 +282,8 @@ void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
   std::cout << "Set Occupied pos: " << wpos.transpose() << std::endl;
 
   publishOccupancyGrid();
-  planAllPaths();
-  publishAllPaths();
+  //planAllPaths();
+  //publishAllPaths();
 }
 void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 {
@@ -227,8 +302,8 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
   std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
 
   publishOccupancyGrid();
-  planAllPaths();
-  publishAllPaths();
+  //planAllPaths();
+  //publishAllPaths();
 }
 
 bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)
@@ -270,9 +345,9 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   
   msg.header.frame_id = "/world";
   msg.poses.resize(dsl_path.size());
-  double xmin = ogrid_->getPmin()(0);
-  double ymin = ogrid_->getPmin()(1);
-  double zmin = ogrid_->getPmin()(2);
+  double xmin = ogrid_->getPmin()(0) - 0.5 + startPose(0);
+  double ymin = ogrid_->getPmin()(1) - 0.5 + startPose(1);
+  double zmin = ogrid_->getPmin()(2) - 0.5 + startPose(2);
   for(int i = 0; i < dsl_path.size(); i++)
   {
     msg.poses[i].pose.position.x = (dsl_path[i][0] + xmin) * res;

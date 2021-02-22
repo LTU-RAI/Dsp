@@ -60,6 +60,9 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
   timer = nh_private_.createTimer(ros::Duration(5.0), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
+  
+  sPose << 0.0, 0.0, 0.0;
+  gPose << 1.0, 1.0, 1.0;
 }
 
 void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
@@ -133,54 +136,58 @@ void DslGrid3D::spin(const ros::TimerEvent& e)
   ROS_INFO("Building search graph...");
   std::shared_ptr<dsl::Grid3d> grid_(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
     ogrid_->getOccupancyMap().get(), 
-    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 100));
+    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
 //  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
   gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
-  gdsl_->SetStart(Eigen::Vector3d(0, 0, 0));
-  gdsl_->SetGoal(Eigen::Vector3d(0, 0, 0));
+  gdsl_->SetStart(ogrid_->positionToDslPosition(sPose));
+  gdsl_->SetGoal(ogrid_->positionToDslPosition(gPose));
   ROS_INFO("Graph built");
 
-  //planAllPaths();
-  //publishAllPaths();
+  planAllPaths();
+  publishAllPaths();
 }
 
 void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
 //  Eigen::Vector3d wpos(msg->x/res_given, msg->y/res_given, msg->z/res_given);
-  Eigen::Vector3d wpos(msg->x/res, msg->y/res, msg->z/res);
+  sPose(0) = msg->x/res;
+  sPose(1) =  msg->y/res;
+  sPose(2) =  msg->z/res;
 
-  if(!isPosInBounds(wpos))
+  if(!isPosInBounds(sPose))
   {
-    ROS_WARN("handleSetStart: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
+    ROS_WARN("handleSetStart: Position %f %f %f out of bounds!", sPose(0), sPose(1), sPose(2));
     return;
   }
  
-  ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
-  Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
+  ROS_INFO("Set start pos: %f %f %f", sPose(0), sPose(1), sPose(2));
+  Eigen::Vector3d pos = ogrid_->positionToDslPosition(sPose);
   gdsl_->SetStart(pos);
 
-  planAllPaths();
-  publishAllPaths();
+  //planAllPaths();
+  //publishAllPaths();
 }
 
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
 //  Eigen::Vector3d wpos(msg->x/res_given, msg->y/res_given, msg->z/res_given);
-  Eigen::Vector3d wpos(msg->x/res, msg->y/res, msg->z/res);
+  gPose(0) = msg->x/res;
+  gPose(1) =  msg->y/res;
+  gPose(2) =  msg->z/res;
 
-  if(!isPosInBounds(wpos))
+  if(!isPosInBounds(gPose))
   {
-    ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
+    ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", gPose(0), gPose(1), gPose(2));
     return;
   } 
 
-  ROS_INFO("Set goal pos: %f %f %f", wpos(0), wpos(1), wpos(2));
-  Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
+  ROS_INFO("Set goal pos: %f %f %f", gPose(0), gPose(1), gPose(2));
+  Eigen::Vector3d pos = ogrid_->positionToDslPosition(gPose);
   ROS_INFO("Set dsl goal pos: %f %f %f", pos(0), pos(1), pos(2));
   gdsl_->SetGoal(pos);
 
-  planAllPaths();
-  publishAllPaths();
+  //planAllPaths();
+  //publishAllPaths();
 }
 void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 {
@@ -218,7 +225,7 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 
   std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
 
-  publishOccupancyGrid();
+  publishOccupancyGrid(wpos);
   planAllPaths();
   publishAllPaths();
 }
@@ -267,9 +274,9 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   double zmin = ogrid_->getPmin()(2);
   for(int i = 0; i < dsl_path.size(); i++)
   {
-    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin;//0.5;
-    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin;//0.5;
-    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin;//0.5;
+    msg.poses[i].pose.position.x = (dsl_path[i][0] + xmin) * res;
+    msg.poses[i].pose.position.y = (dsl_path[i][1] + ymin) * res;
+    msg.poses[i].pose.position.z = (dsl_path[i][2] + zmin) * res;
   }
   return msg; 
 }

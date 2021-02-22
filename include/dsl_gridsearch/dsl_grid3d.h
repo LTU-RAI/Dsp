@@ -73,6 +73,9 @@ private:
 
   ros::Timer timer;
 
+  Eigen::Vector3d sPose;
+  Eigen::Vector3d gPose;
+
   std::string mesh_filename_;
   double cells_per_meter_;
   double spline_step_;

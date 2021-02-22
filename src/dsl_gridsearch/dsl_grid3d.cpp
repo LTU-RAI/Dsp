@@ -139,6 +139,7 @@ void DslGrid3D::spin(const ros::TimerEvent& e)
     1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
 //  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
   gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
+  ROS_INFO("Set start pos: %f %f %f", gPose(0), gPose(1), gPose(2));
   gdsl_->SetStart(ogrid_->positionToDslPosition(sPose));
   gdsl_->SetGoal(ogrid_->positionToDslPosition(gPose));
   ROS_INFO("Graph built");
@@ -225,7 +226,7 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 
   std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
 
-  publishOccupancyGrid(wpos);
+  publishOccupancyGrid();
   planAllPaths();
   publishAllPaths();
 }

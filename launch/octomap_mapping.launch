@@ -11,13 +11,13 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/pixy/velodyne" />
+		<param name="frame_id" type="string" value="/velodyne" />
 		
 		<!-- maximum range to integrate (speedup!) -->
 		<param name="sensor_model/max_range" value="20.0" />
 		
 		<!-- data source to integrate (PointCloud2) -->
-		<remap from="cloud_in" to="/pixy/velodyne_points" />
+		<remap from="cloud_in" to="/velodyne_points" />
 
 		<param name="pointcloud_[min|max]_z" value="20.0" />
 

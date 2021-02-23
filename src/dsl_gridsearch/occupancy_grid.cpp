@@ -5,7 +5,7 @@ using namespace Eigen;
 namespace dsl_gridsearch
 {
  
-OccupancyGrid::OccupancyGrid(double* occupancy_map, int length, int width, int height, Vector3d pmin, Vector3d pmax, double scale) :
+OccupancyGrid::OccupancyGrid(std::shared_ptr<double[]> occupancy_map, int length, int width, int height, Vector3d pmin, Vector3d pmax, double scale) :
   occupancy_map_(occupancy_map),
   length_(length),
   width_(width),
@@ -25,7 +25,7 @@ OccupancyGrid::OccupancyGrid(int length, int width, int height, Vector3d pmin, V
   pmin_(pmin),
   pmax_(pmax)
 {
-  occupancy_map_ = new double[length*width*height];
+  occupancy_map_.reset(new double[length*width*height]);
   for(int i = 0; i < length*width*height; i++)
   {
     occupancy_map_[i] = default_val;
@@ -34,7 +34,7 @@ OccupancyGrid::OccupancyGrid(int length, int width, int height, Vector3d pmin, V
 
 OccupancyGrid::~OccupancyGrid()
 {
-  delete[] occupancy_map_;
+  //delete[] occupancy_map_;
 }
 
 double OccupancyGrid::getCost(const Vector3i& gp)
@@ -144,7 +144,7 @@ double OccupancyGrid::getScale()
   return scale_;
 }
 
-double* OccupancyGrid::getOccupancyMap()
+std::shared_ptr<double[]> OccupancyGrid::getOccupancyMap()
 {
   return occupancy_map_;
 }
@@ -201,7 +201,7 @@ void OccupancyGrid::mergeGrid(OccupancyGrid* ogrid)
     new_pmax(2) = max_gpos(2);
   }
 
-  double* new_occupancy_map = new double[new_length*new_width*new_height];
+  std::shared_ptr <double[]> new_occupancy_map(new double[new_length*new_width*new_height]);
   for(int i = 0; i < new_length*new_width*new_height; i++)
   {
     new_occupancy_map[i] = 0;
@@ -264,7 +264,7 @@ void OccupancyGrid::mergeGrid(OccupancyGrid* ogrid)
   height_ = new_height;
   pmin_ = new_pmin;
   pmax_ = new_pmax;
-  delete[] occupancy_map_;
+  //delete[] occupancy_map_;
   occupancy_map_ = new_occupancy_map;
 }
 

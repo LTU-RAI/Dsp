@@ -116,8 +116,8 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/trimesh/bin)
 
 ## Declare a cpp library
 add_library(dsl_gridsearch
-  src/${PROJECT_NAME}/mesh_utility.cpp
-  src/${PROJECT_NAME}/dsl_grid2d.cpp
+  #src/${PROJECT_NAME}/mesh_utility.cpp
+  #src/${PROJECT_NAME}/dsl_grid2d.cpp
   src/${PROJECT_NAME}/dsl_grid3d.cpp
   src/${PROJECT_NAME}/occupancy_grid.cpp
 )
@@ -129,7 +129,7 @@ target_link_libraries(dsl_gridsearch
 
 ## Declare a cpp executable
 add_executable(dsl_grid3d_node src/${PROJECT_NAME}/dsl_grid3d_node.cpp)
-add_executable(dsl_grid2d_node src/${PROJECT_NAME}/dsl_grid2d_node.cpp)
+#add_executable(dsl_grid2d_node src/${PROJECT_NAME}/dsl_grid2d_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -143,7 +143,7 @@ target_link_libraries(dsl_grid3d_node
   ${catkin_LIBRARIES}
 )
 
-target_link_libraries(dsl_grid2d_node
+target_link_libraries(#dsl_grid2d_node
   dsl_gridsearch
   libtrimesh.a
   libgluit.a

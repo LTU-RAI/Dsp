@@ -19,6 +19,8 @@
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
 
+#include <memory>
+
 namespace dsl_gridsearch
 {
 
@@ -45,13 +47,13 @@ private:
   bool isPosInBounds(const Eigen::Vector3d& pos);
   boost::shared_ptr<geometry_msgs::Point const> setGoal;
 
-  dsl::Grid3d* grid_;
+  std::shared_ptr<dsl::Grid3d> grid_;
   dsl::GridCost<3> cost_;
-  dsl::Grid3dConnectivity* connectivity_;
-  dsl::GridSearch<3>* gdsl_;
+  std::shared_ptr<dsl::Grid3dConnectivity> connectivity_;
+  std::shared_ptr<dsl::GridSearch<3>> gdsl_;
   dsl::GridPath<3> path_, optpath_, splinecells_, splineoptcells_;
   std::vector<Eigen::Vector3d> splinepath_, splineoptpath_;
-  OccupancyGrid* ogrid_;
+  std::shared_ptr<OccupancyGrid> ogrid_;
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -74,10 +76,15 @@ private:
   double cells_per_meter_;
   double spline_step_;
   bool use_gazebo_odom_;
+  std::string odom_topic_;
   int grid_length_;
   int grid_width_;
   int grid_height_;
   double res_octomap;
+
+  Eigen::Vector3d start_pos;
+  Eigen::Vector3d goal_pos;
+  bool start_set = false;
 };
 
 

@@ -43,17 +43,18 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   else
   {
     ROS_INFO("Manualy set start");
-    set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_start", 10, 
+    set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_start", 1, 
       &DslGrid3D::handleSetStart, this, ros::TransportHints().tcpNoDelay());
   }
 
-  set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_goal", 10,
+  set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_goal", 1,
     &DslGrid3D::handleSetGoal, this, ros::TransportHints().tcpNoDelay());
-  set_occupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_occupied", 10, 
+  set_occupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_occupied", 1, 
     &DslGrid3D::handleSetOccupied, this, ros::TransportHints().tcpNoDelay());
-  set_unoccupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_unoccupied", 10, 
+  set_unoccupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_unoccupied", 1, 
     &DslGrid3D::handleSetUnoccupied, this, ros::TransportHints().tcpNoDelay());
-  get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1,
+  //get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1,
+  get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_full", 1,
     &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
 
   //timer = nh_private_.createTimer(ros::Duration(0.1), &DslGrid3D::spin, this);
@@ -187,8 +188,8 @@ void DslGrid3D::spin(const ros::TimerEvent& e)
 
 void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
-  //Eigen::Vector3d wpos(msg.pose.pose.position.x / res_octomap, msg.pose.pose.position.y / res_octomap, msg.pose.pose.position.z / res_octomap);
-  Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
+  Eigen::Vector3d wpos(msg.pose.pose.position.x / res_octomap, msg.pose.pose.position.y / res_octomap, msg.pose.pose.position.z / res_octomap);
+  //Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
     
   std::cout << "wpos: " << wpos << std::endl;
     //if (!start_set){
@@ -206,12 +207,15 @@ void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
     //Eigen::Matrix3d rot(0, -1, 0,  1, 0, 0,  0, 0, 1);
     //Eigen::Vector3d temp  = rot * wpos;
     //std::cout<<rot * wpos<<std::endl;
-    //wpos = wpos - first_pos;
+   // wpos = wpos - first_pos;
 
-  std::cout << "wpos: " << wpos << std::endl;
+  //std::cout << "world: " << wpos << std::endl;
+    //start_set = true;
+  //return;
   if(!isPosInBounds(wpos))
   {
     ROS_WARN("handleSetStartOdom: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
+    //start_set = false;
     return;
   }
  
@@ -281,8 +285,14 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
   if(start_pos == goal_pos){
     return;
   }
-  gdsl_->SetStart(start_pos);
-  gdsl_->SetGoal(goal_pos);
+  if (!gdsl_->SetStart(start_pos))
+  {
+    return;
+  }
+  if (!gdsl_->SetGoal(goal_pos))
+  {
+    return;
+  }
 //  gdsl_->SetGoal(wpos);
 
   planAllPaths();

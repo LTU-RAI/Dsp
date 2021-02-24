@@ -187,7 +187,27 @@ void DslGrid3D::spin(const ros::TimerEvent& e)
 
 void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
-  Eigen::Vector3d wpos(msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z);
+  //Eigen::Vector3d wpos(msg.pose.pose.position.x / res_octomap, msg.pose.pose.position.y / res_octomap, msg.pose.pose.position.z / res_octomap);
+  Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
+    
+  std::cout << "wpos: " << wpos << std::endl;
+    //if (!start_set){
+    // rotation to odom fram
+        //tf::Quaternion q(msg.pose.pose.orientation.x,
+        //    msg.pose.pose.orientation.y,
+        //    msg.pose.pose.orientation.z,
+        //    msg.pose.pose.orientation.w);
+        //tf::Matrix3x3 m(q);
+        //rot << m[0][0], m[0][1], m[0][2],
+        //    m[1][0], m[1][1], m[1][2],
+        //    m[2][0], m[2][1], m[2][2];
+        //first_pos = wpos;
+    //}
+    //Eigen::Matrix3d rot(0, -1, 0,  1, 0, 0,  0, 0, 1);
+    //Eigen::Vector3d temp  = rot * wpos;
+    //std::cout<<rot * wpos<<std::endl;
+    //wpos = wpos - first_pos;
+
   std::cout << "wpos: " << wpos << std::endl;
   if(!isPosInBounds(wpos))
   {
@@ -197,9 +217,9 @@ void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
  
   ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
   //start_pos = wpos;
-  //  start_pos = ogrid_->positionToDslPosition(wpos);
-  Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
-  gdsl_->SetStart(start_pos); 
+    start_pos = ogrid_->positionToDslPosition(wpos);
+  //Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
+  //gdsl_->SetStart(start_pos); 
 //  gdsl_->SetStart(wpos);
 
     start_set = true;
@@ -225,7 +245,7 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
   //start_pos = wpos;
     start_pos = ogrid_->positionToDslPosition(wpos);
   //Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
-  gdsl_->SetStart(start_pos); 
+  //gdsl_->SetStart(start_pos); 
   //gdsl_->SetStart(wpos);
 
     start_set = true;
@@ -397,9 +417,9 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   double zmin = ogrid_->getPmin()(2) * res_octomap;
   for(int i = 0; i < dsl_path.size(); i++)
   {
-    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin;//0.5;
-    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin;//0.5;
-    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin;//0.5;
+    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin + res_octomap / 2; //- 0.25;
+    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin + res_octomap / 2; // - 0.25;
+    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin + res_octomap / 2; // - 0.25;
   }
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -437,7 +457,7 @@ void DslGrid3D::publishOccupancyGrid()
           pt.y = y/cells_per_meter_ * res_octomap;
           pt.z = z/cells_per_meter_ * res_octomap;
           marker_pos.push_back(pt);
-        }
+        }  
       }  
     }
   }

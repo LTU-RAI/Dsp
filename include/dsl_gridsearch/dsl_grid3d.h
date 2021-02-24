@@ -20,6 +20,7 @@
 #include <octomap/octomap.h>
 
 #include <memory>
+#include <tf/transform_datatypes.h>
 
 namespace dsl_gridsearch
 {
@@ -82,6 +83,8 @@ private:
   int grid_height_;
   double res_octomap;
 
+  Eigen::Matrix<double, 3,3> rot;
+  Eigen::Vector3d first_pos;
   Eigen::Vector3d start_pos;
   Eigen::Vector3d goal_pos;
   bool start_set = false;

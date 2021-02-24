@@ -11,7 +11,8 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/velodyne" />
+		<param name="frame_id" type="string" value="/odom" />
+
 		
 		<!-- maximum range to integrate (speedup!) -->
 		<param name="sensor_model/max_range" value="20.0" />
@@ -24,6 +25,7 @@
 		<param name="occupancy_[min|max]_z" value="20.0" />
 
 	</node>
+                <!--<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 odom world 100" /-->
 </launch>
 
         <!--param name="occupancy_min_z" value="-0.5" /-->

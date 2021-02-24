@@ -5,6 +5,7 @@
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
+#include <exploration/Frontier.h>
 
 #include "dsl/gridsearch.h"
 #include "dsl/gridcost.h"
@@ -34,6 +35,7 @@ private:
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
   void handleSetStartOdom(const nav_msgs::Odometry msg);
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
+  void handleSetFrontier(const exploration::FrontierConstPtr& msg);
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
   void spin(const ros::TimerEvent& e);
@@ -68,6 +70,7 @@ private:
   ros::Subscriber set_start_sub_;
   ros::Subscriber set_start_odom_sub_;
   ros::Subscriber set_goal_sub_;
+  ros::Subscriber set_frontier_sub;
   ros::Subscriber set_occupied_sub_;
   ros::Subscriber set_unoccupied_sub_;
   ros::Subscriber get_octomap_sub_;

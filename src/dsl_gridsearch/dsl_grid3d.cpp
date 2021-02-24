@@ -38,7 +38,7 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   {
     ROS_INFO("Using odom ass start");
     set_start_odom_sub_ = nh_.subscribe<nav_msgs::Odometry>(odom_topic_, 1, 
-      &DslGrid3D::handleSetStartOdom, this, ros::TransportHints().tcpNoDelay());
+      &DslGrid3D::handleSetStartOdom, this);//, ros::TransportHints().tcpNoDelay());
   }
   else
   {
@@ -48,14 +48,16 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   }
 
   set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_goal", 1,
-    &DslGrid3D::handleSetGoal, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::handleSetGoal, this);//s, ros::TransportHints().tcpNoDelay());
+  set_frontier_sub = nh_.subscribe<exploration::Frontier>("/next_frontier", 1,
+    &DslGrid3D::handleSetFrontier, this);
   set_occupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_occupied", 1, 
-    &DslGrid3D::handleSetOccupied, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::handleSetOccupied, this);//s, ros::TransportHints().tcpNoDelay());
   set_unoccupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_unoccupied", 1, 
-    &DslGrid3D::handleSetUnoccupied, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::handleSetUnoccupied, this);//s, ros::TransportHints().tcpNoDelay());
   //get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1,
   get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_full", 1,
-    &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::octomap_data_callback, this);//, ros::TransportHints().tcpNoDelay());
 
   //timer = nh_private_.createTimer(ros::Duration(0.1), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
@@ -158,11 +160,6 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
   std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
   connectivity_.reset(new dsl::Grid3dConnectivity(*grid_));
   gdsl_.reset(new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true));
-  //gdsl_->SetStart(Eigen::Vector3d(0, 0, 0));
-  //gdsl_->SetStart(start_pos);
-  //gdsl_->SetStart(ogrid_->positionToDslPosition(start_pos));
-  //gdsl_->SetGoal(ogrid_->positionToDslPosition(goal_pos));
-  //gdsl_->SetGoal(Eigen::Vector3d(0, 0, 0));
   ROS_INFO("Graph built");
   
 
@@ -262,6 +259,53 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
   std::cout << std::endl;
 }
 
+void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg){
+  using namespace std::chrono;
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    std::cout<<"frontier "<<std::endl;
+    //std::cout<<msg<<std::endl;
+    Eigen::Vector3d wpos(msg->point.x / res_octomap, msg->point.y / res_octomap, msg->point.z / res_octomap);
+
+  if(!isPosInBounds(wpos))
+  {
+    ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
+    return;
+  } 
+  if(!start_set){
+    ROS_WARN("handleSetGoal: Start not set");
+    return;
+  }
+
+    ROS_INFO("Set goal pos: %f %f %f", wpos(0), wpos(1), wpos(2));
+  goal_pos = ogrid_->positionToDslPosition(wpos);
+  ROS_INFO("Set dsl start_pos: %f %f %f \nSet dsl goal_pos: %f %f %f", start_pos(0), start_pos(1), start_pos(2), goal_pos(0), goal_pos(1), goal_pos(2));
+  if((int) start_pos(0) == (int) goal_pos(0)
+    and (int) start_pos(1) == (int) goal_pos(1)
+    and (int) start_pos(2) == (int) goal_pos(2))
+  {
+    
+    ROS_WARN("Start and goal poses are the some");
+    return;
+  }
+  if (!gdsl_->SetStart(start_pos))
+  {
+    return;
+  }
+  if (!gdsl_->SetGoal(goal_pos))
+  {
+    return;
+  }
+//  gdsl_->SetGoal(wpos);
+
+  planAllPaths();
+  publishAllPaths();
+
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+  std::cout << "----LOG: handleSetGoal. It took me " << time_span.count() << " seconds.";
+  std::cout << std::endl;
+}
+
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
   using namespace std::chrono;
@@ -303,6 +347,7 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
   std::cout << "----LOG: handleSetGoal. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
 }
+
 void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 {
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);

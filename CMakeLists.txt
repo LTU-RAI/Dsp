@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   octomap_ros
   octomap_msgs
+  exploration
 )
 
 ## System dependencies are found with CMake's conventions

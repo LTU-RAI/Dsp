@@ -78,6 +78,7 @@ private:
   double spline_step_;
   bool use_gazebo_odom_;
   std::string odom_topic_;
+  std::string odom_frame_id_;
   int grid_length_;
   int grid_width_;
   int grid_height_;

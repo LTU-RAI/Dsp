@@ -27,35 +27,37 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         odom_topic_ = "/pixy/truth/NWU";
 /*  if (!nh_private_.getParam ("spline_step_", spline_step_))
     spline_step_ = .1;*/
+  if (!nh_private_.getParam ("odom_frame_id", odom_frame_id_))
+    odom_frame_id_ = "odom";
 
   occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "/dsl_grid3d/occupancy_map",  0);
   path_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/path",  0);
   optpath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/optpath",  0);
-/*  splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splinepath",  0);
-  splineoptpath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splineoptpath",  0);*/
+  splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splinepath",  0);
+  splineoptpath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splineoptpath",  0);
 
   if(use_gazebo_odom_)
   {
     ROS_INFO("Using odom ass start");
     set_start_odom_sub_ = nh_.subscribe<nav_msgs::Odometry>(odom_topic_, 1, 
-      &DslGrid3D::handleSetStartOdom, this, ros::TransportHints().tcpNoDelay());
+      &DslGrid3D::handleSetStartOdom, this);
   }
   else
   {
     ROS_INFO("Manualy set start");
     set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_start", 1, 
-      &DslGrid3D::handleSetStart, this, ros::TransportHints().tcpNoDelay());
+      &DslGrid3D::handleSetStart, this);
   }
 
   set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_goal", 1,
-    &DslGrid3D::handleSetGoal, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::handleSetGoal, this);
   set_occupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_occupied", 1, 
-    &DslGrid3D::handleSetOccupied, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::handleSetOccupied, this);
   set_unoccupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_unoccupied", 1, 
-    &DslGrid3D::handleSetUnoccupied, this, ros::TransportHints().tcpNoDelay());
-  //get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1,
-  get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_full", 1,
-    &DslGrid3D::octomap_data_callback, this, ros::TransportHints().tcpNoDelay());
+    &DslGrid3D::handleSetUnoccupied, this);
+  get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_binary", 1,
+  //get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_full", 1,
+    &DslGrid3D::octomap_data_callback, this);
 
   //timer = nh_private_.createTimer(ros::Duration(0.1), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
@@ -282,7 +284,10 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
   //goal_pos = wpos;
   goal_pos = ogrid_->positionToDslPosition(wpos);
   //ROS_INFO("Set dsl goal pos: %f %f %f", goal_pos(0), goal_pos(1), goal_pos(2));
-  if(start_pos == goal_pos){
+  if((int) start_pos(0) == (int) goal_pos(0)
+	  and (int) start_pos(1) == (int) goal_pos(1)
+	  and (int) start_pos(2) == (int) goal_pos(2))
+  {
     return;
   }
   if (!gdsl_->SetStart(start_pos))
@@ -369,8 +374,8 @@ void DslGrid3D::planAllPaths()
 
   gdsl_->Plan(path_);
   gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
-//  gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
-//  gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
+  //gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
+  //gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
@@ -385,8 +390,8 @@ void DslGrid3D::publishAllPaths()
 
   path_pub_.publish(dslPathToRosMsg(path_));
   optpath_pub_.publish(dslPathToRosMsg(optpath_)); 
-/*  splinepath_pub_.publish(dslPathToRosMsg(splinepath_)); 
-  splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_)); */
+  //splinepath_pub_.publish(dslPathToRosMsg(splinepath_)); 
+  //splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_)); 
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
@@ -420,16 +425,16 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
 
   nav_msgs::Path msg;  
   
-  msg.header.frame_id = "odom"; ///world /pixy/velodyne
+  msg.header.frame_id = odom_frame_id_; ///world /pixy/velodyne
   msg.poses.resize(dsl_path.size());
   double xmin = ogrid_->getPmin()(0) * res_octomap;
   double ymin = ogrid_->getPmin()(1) * res_octomap;
   double zmin = ogrid_->getPmin()(2) * res_octomap;
   for(int i = 0; i < dsl_path.size(); i++)
   {
-    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin + res_octomap / 2; //- 0.25;
-    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin + res_octomap / 2; // - 0.25;
-    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin + res_octomap / 2; // - 0.25;
+    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin + res_octomap / 2 - 0.25;
+    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin + res_octomap / 2 - 0.25;
+    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin + res_octomap / 2 - 0.25;
   }
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -472,7 +477,7 @@ void DslGrid3D::publishOccupancyGrid()
     }
   }
 
-  occmap_viz.header.frame_id = "odom"; ///world /pixy/velodyne
+  occmap_viz.header.frame_id = odom_frame_id_; ///world /pixy/velodyne
   occmap_viz.header.stamp = ros::Time();
   occmap_viz.ns = "dsl_grid3d";
   occmap_viz.id = 1;

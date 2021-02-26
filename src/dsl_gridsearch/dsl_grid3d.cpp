@@ -51,6 +51,8 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
   set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_goal", 1,
     &DslGrid3D::handleSetGoal, this);
+  set_frontier_sub = nh_.subscribe<exploration::Frontier>("/next_frontier", 1,
+    &DslGrid3D::handleSetFrontier, this);
   set_occupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_occupied", 1, 
     &DslGrid3D::handleSetOccupied, this);
   set_unoccupied_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_unoccupied", 1, 

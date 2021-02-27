@@ -82,21 +82,68 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 	std::cout << "size: " << tree->size() << std::endl;
 
     res_octomap = tree->getResolution();
-	double length,width,height, xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
-    tree->getMetricSize(length,width,height);
+    double length_test, width_test, height_test;
+    tree->getMetricSize(length_test, width_test, height_test);
     tree->getMetricMin(xmin, ymin, zmin);
     tree->getMetricMax(xmax, ymax, zmax);
+    int count = 0;
+
+    ROS_INFO("l %f, w %f, h %f\nl %f, w %f, h %f", length_test, width_test, height_test, length, width, height);
+    if (length_test * width_test * height_test == length * width * height)
+    {
+        high_resolution_clock::time_point re = high_resolution_clock::now();
+       for(octomap::OcTree::leaf_iterator it = tree->begin_leafs(), end = tree->end_leafs(); it != end; ++it)
+        {
+            count++;
+            int x = it.getX()/res_octomap - xmin/res_octomap;
+            int y = it.getY()/res_octomap - ymin/res_octomap;
+            int z = it.getZ()/res_octomap - zmin/res_octomap;
+            int idx = x + y*length_metric + z*length_metric*width_metric;
+    	    //std::cout << "Metric. x: " << x << " y: " << y << " z: " << z << " idx "<< idx << std::endl;
+            assert(!(idx >= length_metric*width_metric*height_metric || idx < 0));
+            it->getOccupancy();
+            if(tree->isNodeOccupied(*it) and occupancy_map[idx] == DSL_OCCUPIED)
+            {
+                Eigen::Vector3d wpos(it.getX(), it.getY(), it.getZ());
+                //Eigen::Vector3i wpos(it.getX()/res_octomap, it.getY()/res_octomap, it.getZ()/res_octomap);
+                DslGrid3D::handleSetOccupied(wpos); 
+            }			
+            else if(!tree->isNodeOccupied(*it) and occupancy_map[idx] == 0)
+            {
+                Eigen::Vector3d wpos(it.getX(), it.getY(), it.getZ());
+                DslGrid3D::handleSetUnoccupied(wpos); 
+            }
+        }
+        publishOccupancyGrid();
+        if(start_set and goal_set)
+        {
+            if(gdsl_->SetStart(start_pos) and gdsl_->SetGoal(goal_pos))
+            {
+                planAllPaths();
+                publishAllPaths();
+            }
+        }
+        high_resolution_clock::time_point re2 = high_resolution_clock::now();
+        duration<double> time_span = duration_cast<duration<double>>(re2 - re);
+        std::cout<<"----LOG: update took me "<< time_span.count()<<std::endl;
+        return;
+    }
+    length = length_test;
+    width = width_test;
+    height = height_test;
+
 
     std::cout << "Metric size. length: " << length/res_octomap << " width: " << width/res_octomap << " height: " << height/res_octomap << std::endl;
-	int length_metric = length/res_octomap;
-	int width_metric = width/res_octomap;
-	int height_metric = height/res_octomap;
+    length_metric = length/res_octomap;
+    width_metric = width/res_octomap;
+    height_metric = height/res_octomap;
 
     //const double occupied_val = DSL_OCCUPIED;
-    int count = 0;
-    std::shared_ptr<double[]> occupancy_map(new double[length_metric*width_metric*height_metric]);
+    int size = length_metric * width_metric * height_metric;
+    std::cout<<"Size: "<<size<<std::endl;
+    occupancy_map.reset(new double[size]);
 
-   for(int i = 0; i < length_metric*width_metric*height_metric; i++)
+   for(int i = 0; i < size; i++)
    {
      occupancy_map[i] = 0; //occupied_val;
    }
@@ -117,7 +164,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 			occupancy_map[idx] = DSL_OCCUPIED;
 		}			
     }
-	std::cout << "count: " << count << std::endl;
+    std::cout << "count: " << count << std::endl;
     ogrid_.reset(new OccupancyGrid(occupancy_map, length_metric, width_metric, height_metric, 
       Eigen::Vector3d(xmin/res_octomap, ymin/res_octomap, zmin/res_octomap), 
       Eigen::Vector3d(xmax/res_octomap, ymax/res_octomap, zmax/res_octomap), 1));
@@ -289,6 +336,7 @@ void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg){
     ROS_WARN("Start and goal poses are the some");
     return;
   }
+  goal_set = true;
   if (!gdsl_->SetStart(start_pos))
   {
     return;
@@ -334,6 +382,7 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
   {
     return;
   }
+  goal_set = true;
   if (!gdsl_->SetStart(start_pos))
   {
     return;
@@ -356,6 +405,10 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 {
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
+  DslGrid3D::handleSetOccupied(wpos);
+}
+void DslGrid3D::handleSetOccupied(Eigen::Vector3d wpos)
+{
 
   if(!isPosInBounds(wpos))
   {
@@ -366,17 +419,23 @@ void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
   Eigen::Vector3i gpos = ogrid_->positionToGrid(wpos);
   ogrid_->setOccupied(wpos, true);
   gdsl_->SetCost(ogrid_->positionToDslPosition(wpos), DSL_OCCUPIED);
-//  gdsl_->SetCost(wpos, DSL_OCCUPIED);
+  //gdsl_->SetCost(wpos, DSL_OCCUPIED);
 
-  std::cout << "Set Occupied pos: " << wpos.transpose() << std::endl;
+  //std::cout << "Set Occupied pos: " << wpos.transpose() << std::endl;
 
-  publishOccupancyGrid();
-  planAllPaths();
-  publishAllPaths();
+  //publishOccupancyGrid();
+  //planAllPaths();
+  //publishAllPaths();
 }
+
 void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 {
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
+  handleSetUnoccupied(wpos);
+}
+
+void DslGrid3D::handleSetUnoccupied(Eigen::Vector3d wpos)
+{
 
   if(!isPosInBounds(wpos))
   {
@@ -387,13 +446,13 @@ void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
   Eigen::Vector3i gpos = ogrid_->positionToGrid(wpos);
   ogrid_->setOccupied(wpos, false);
   gdsl_->SetCost(ogrid_->positionToDslPosition(wpos), 0);
-//  gdsl_->SetCost(wpos, 0);
+  //gdsl_->SetCost(wpos, 0);
 
-  std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
+  //std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
 
-  publishOccupancyGrid();
-  planAllPaths();
-  publishAllPaths();
+  //publishOccupancyGrid();
+  //planAllPaths();
+  //publishAllPaths();
 }
 
 bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)

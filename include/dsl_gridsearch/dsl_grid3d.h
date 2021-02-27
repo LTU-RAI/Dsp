@@ -41,6 +41,9 @@ private:
   void spin(const ros::TimerEvent& e);
   void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
 
+  void handleSetOccupied(Eigen::Vector3d wpos);
+  void handleSetUnoccupied(Eigen::Vector3d wpos);
+
   void publishAllPaths();
   void publishOccupancyGrid();
 
@@ -85,13 +88,22 @@ private:
   int grid_length_;
   int grid_width_;
   int grid_height_;
+  int length_metric;
+  int width_metric;
+  int height_metric;
   double res_octomap;
-
+  std::shared_ptr<double[]> occupancy_map;
+  
   Eigen::Matrix<double, 3,3> rot;
   Eigen::Vector3d first_pos;
   Eigen::Vector3d start_pos;
   Eigen::Vector3d goal_pos;
   bool start_set = false;
+  bool goal_set = false;
+  double length = -1.0;
+  double width = -1.0;
+  double height = -1.0;
+  double xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
 };
 
 

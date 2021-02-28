@@ -102,13 +102,13 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
     	    //std::cout << "Metric. x: " << x << " y: " << y << " z: " << z << " idx "<< idx << std::endl;
             assert(!(idx >= length_metric*width_metric*height_metric || idx < 0));
             it->getOccupancy();
-            if(tree->isNodeOccupied(*it) and occupancy_map[idx] == DSL_OCCUPIED)
+            if(tree->isNodeOccupied(*it) and occupancy_map[idx] != DSL_OCCUPIED)
             {
                 Eigen::Vector3d wpos(it.getX(), it.getY(), it.getZ());
                 //Eigen::Vector3i wpos(it.getX()/res_octomap, it.getY()/res_octomap, it.getZ()/res_octomap);
                 DslGrid3D::handleSetOccupied(wpos); 
             }			
-            else if(!tree->isNodeOccupied(*it) and occupancy_map[idx] == 0)
+            else if(!tree->isNodeOccupied(*it) and occupancy_map[idx] != 0)
             {
                 Eigen::Vector3d wpos(it.getX(), it.getY(), it.getZ());
                 DslGrid3D::handleSetUnoccupied(wpos); 

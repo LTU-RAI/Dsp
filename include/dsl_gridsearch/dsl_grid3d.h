@@ -104,6 +104,9 @@ private:
   double width = -1.0;
   double height = -1.0;
   double xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
+
+  int seq;
+  std::string pwd = "/home/grammers/temp_log/";
 };
 
 

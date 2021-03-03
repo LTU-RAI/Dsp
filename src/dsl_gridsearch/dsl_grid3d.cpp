@@ -9,6 +9,8 @@
 #include <octomap/octomap.h>
 
 #include <chrono>
+#include <iostream>
+#include <fstream>
 
 namespace dsl_gridsearch
 {
@@ -17,6 +19,7 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_(nh),
   nh_private_(nh_private)
 {
+        
   double grid_xmin, grid_ymin, grid_zmin;
 
   if (!nh_private_.getParam ("cells_per_meter", cells_per_meter_))
@@ -73,6 +76,8 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
+    seq = msg->header.seq;
+
     octomap::AbstractOcTree* treeptr = octomap_msgs::msgToMap(*msg);
     // This can be cast to other types. An octree seems to be appropriate for publishing
     octomap::OcTree* tree = dynamic_cast<octomap::OcTree*>(treeptr);
@@ -114,6 +119,17 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
                 DslGrid3D::handleSetUnoccupied(wpos); 
             }
         }
+
+        high_resolution_clock::time_point re2 = high_resolution_clock::now();
+        duration<double> time_span = duration_cast<duration<double>>(re2 - re);
+        std::cout<<"----LOG: update took me "<< time_span.count()<<std::endl;
+
+        std::ofstream outfile;
+        outfile.open(pwd + "fullUpdate_time_volumeMapM_seq.log", std::ios::app);
+        //outfile.open("/home/grammers/temp_log/fullUpdate_time_volumeMapM_seq.log", std::ios::app);
+        outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
+        outfile.close();
+        
         publishOccupancyGrid();
         if(start_set and goal_set)
         {
@@ -123,11 +139,10 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
                 publishAllPaths();
             }
         }
-        high_resolution_clock::time_point re2 = high_resolution_clock::now();
-        duration<double> time_span = duration_cast<duration<double>>(re2 - re);
-        std::cout<<"----LOG: update took me "<< time_span.count()<<std::endl;
+
         return;
     }
+
     length = length_test;
     width = width_test;
     height = height_test;
@@ -216,6 +231,12 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
   time_span = duration_cast<duration<double>>(t4 - t3);
   std::cout << "----LOG: Building DSL search graph. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
+
+    std::ofstream outfile;
+    outfile.open(pwd + "rebuild_time_volumeMapM_seq.log", std::ios::app);
+    outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
+    outfile.close();
+    return;
 
 //  publishAllPaths();
   publishOccupancyGrid();
@@ -386,8 +407,11 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
   if (!gdsl_->SetStart(start_pos))
   {
     return;
+    
+
   }
   if (!gdsl_->SetGoal(goal_pos))
+  
   {
     return;
   }
@@ -485,6 +509,12 @@ void DslGrid3D::planAllPaths()
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "----LOG: planAllPaths. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
+    
+    std::ofstream outfile;
+    outfile.open(pwd + "pathPlaning_time_volumeMapM_seq.log", std::ios::app);
+    outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
+    outfile.close();
+    return;
 }
 
 void DslGrid3D::publishAllPaths()
@@ -501,6 +531,7 @@ void DslGrid3D::publishAllPaths()
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
   std::cout << "----LOG: publishAllPaths. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
+
 }
 
 nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)

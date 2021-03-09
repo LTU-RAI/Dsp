@@ -15,14 +15,15 @@
 
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="12.0" />
+		<param name="sensor_model/max_range" value="24.0" />
 		
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/pixy/velodyne_points" />
 
-		<param name="pointcloud_[min|max]_z" value="12.0" />
-
-		<param name="occupancy_[min|max]_z" value="12.0" />
+    	<!--param name="pointcloud_min_z" type="double" value="-8.0" /-->
+	    <!--param name="pointcloud_max_z" type="double" value="8.0" /-->
+    	<!--param name="occupancy_min_z" type="double" value="-8.0" /-->
+    	<!--param name="occupancy_max_z" type="double" value="8.0" /-->
 
 	</node>
 	<!--node pkg="tf" type="static_transform_publisher" name="world2odom2" args="0 0 0 1.5708 -0 0 /cave_world /pixy/base_link 10" /-->

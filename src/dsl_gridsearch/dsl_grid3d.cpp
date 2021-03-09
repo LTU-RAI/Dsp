@@ -565,18 +565,12 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   double xmin = ogrid_->getPmin()(0) * res_octomap;
   double ymin = ogrid_->getPmin()(1) * res_octomap;
   double zmin = ogrid_->getPmin()(2) * res_octomap;
-//  std::cout << "x " << xmin << " seconds.";
-//  std::cout << "y " << ymin << " seconds.";
-//  std::cout << "z " << zmin << " seconds.\n";
 
   for(int i = 0; i < dsl_path.size(); i++)
   {
-//    std::cout << "dx " << dsl_path[i][0] << " seconds.";
-//    std::cout << "dy " << dsl_path[i][1] << " seconds.";
-//    std::cout << "dz " << dsl_path[i][2] << " seconds.\n";
-    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin; // - res_octomap / 2; // - 0.25;
-    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin; // - res_octomap / 2; // - 0.25;
-    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin; // - res_octomap / 2; // - 0.25;
+    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin;
+    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin;
+    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin;
   }
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();

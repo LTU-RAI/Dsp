@@ -130,7 +130,6 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
         outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
         outfile.close();
         
-//        publishOccupancyGrid();
         if(start_set and goal_set)
         {
             if(gdsl_->SetStart(start_pos) and gdsl_->SetGoal(goal_pos))
@@ -238,8 +237,6 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
     outfile.close();
     return;
 
-//  publishAllPaths();
-//  publishOccupancyGrid();
   //planAllPaths();
   //publishAllPaths();
 
@@ -447,7 +444,6 @@ void DslGrid3D::handleSetOccupied(Eigen::Vector3d wpos)
 
   //std::cout << "Set Occupied pos: " << wpos.transpose() << std::endl;
 
-  //publishOccupancyGrid();
   //planAllPaths();
   //publishAllPaths();
 }
@@ -474,7 +470,6 @@ void DslGrid3D::handleSetUnoccupied(Eigen::Vector3d wpos)
 
   //std::cout << "Set Unoccupied pos: " << wpos.transpose() << std::endl;
 
-  //publishOccupancyGrid();
   //planAllPaths();
   //publishAllPaths();
 }

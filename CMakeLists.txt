@@ -9,9 +9,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  nav_msgs
   tf
   octomap_ros
   octomap_msgs
+  exploration
 )
 
 ## System dependencies are found with CMake's conventions
@@ -90,7 +92,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES dslviz
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs
   DEPENDS eigen system_lib
 )
 
@@ -115,7 +117,6 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/trimesh/bin)
 
 ## Declare a cpp library
 add_library(dsl_gridsearch
- # src/${PROJECT_NAME}/mesh_utility.cpp
   #src/${PROJECT_NAME}/dsl_grid2d.cpp
   src/${PROJECT_NAME}/dsl_grid3d.cpp
   src/${PROJECT_NAME}/occupancy_grid.cpp
@@ -148,6 +149,7 @@ target_link_libraries(dsl_grid3d_node
 #  libgluit.a
 #  ${catkin_LIBRARIES}
 #)
+
 #############
 ## Install ##
 #############

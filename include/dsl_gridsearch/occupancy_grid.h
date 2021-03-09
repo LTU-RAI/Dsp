@@ -7,6 +7,7 @@
 #include <memory>
 
 #define DSL_OCCUPIED 1e10
+#include <memory>
 
 
 namespace dsl_gridsearch

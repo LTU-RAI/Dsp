@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <!-- 
   Example launch file for octomap_server mapping: 
   Listens to incoming PointCloud2 data and incrementally builds an octomap. 
@@ -12,18 +11,18 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/odom" />
+		<param name="frame_id" type="string" value="/pixy/base_link_NWU" />
 
 		
 		<!-- maximum range to integrate (speedup!) -->
 		<param name="sensor_model/max_range" value="20.0" />
 		
 		<!-- data source to integrate (PointCloud2) -->
-		<remap from="cloud_in" to="/velodyne_points" />
+		<remap from="cloud_in" to="/pixy/velodyne_points" />
 
-		<param name="pointcloud_[min|max]_z" value="20.0" />
+		<param name="pointcloud_[min|max]_z" value="5.0" />
 
-		<param name="occupancy_[min|max]_z" value="20.0" />
+		<param name="occupancy_[min|max]_z" value="5.0" />
 
 	</node>
                 <!--<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 odom world 100" /-->

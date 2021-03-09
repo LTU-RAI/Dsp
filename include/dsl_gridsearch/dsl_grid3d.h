@@ -5,10 +5,7 @@
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
-<<<<<<< HEAD
-=======
 #include <exploration/Frontier.h>
->>>>>>> updating
 
 #include "dsl/gridsearch.h"
 #include "dsl/gridcost.h"
@@ -23,10 +20,6 @@
 #include <octomap/octomap.h>
 
 #include <memory>
-<<<<<<< HEAD
-=======
-#include <tf/transform_datatypes.h>
->>>>>>> updating
 
 namespace dsl_gridsearch
 {
@@ -38,19 +31,11 @@ public:
 
 private:
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
-<<<<<<< HEAD
-  void pos_callback(const nav_msgs::OdometryConstPtr& msg);
-=======
   void handleSetStartOdom(const nav_msgs::Odometry msg);
->>>>>>> updating
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
   void handleSetFrontier(const exploration::FrontierConstPtr& msg);
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
-<<<<<<< HEAD
-  //void handleAddMesh(const shape_msgs::MeshConstPtr& msg);
-=======
->>>>>>> updating
   void spin(const ros::TimerEvent& e);
   void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
 
@@ -66,15 +51,9 @@ private:
   bool isPosInBounds(const Eigen::Vector3d& pos);
   boost::shared_ptr<geometry_msgs::Point const> setGoal;
 
-<<<<<<< HEAD
-  //std::shared_ptr<dsl::Grid3d> grid_;
-  dsl::GridCost<3> cost_;
-  //dsl::Grid3dConnectivity* connectivity_;
-=======
   std::shared_ptr<dsl::Grid3d> grid_;
   dsl::GridCost<3> cost_;
   std::shared_ptr<dsl::Grid3dConnectivity> connectivity_;
->>>>>>> updating
   std::shared_ptr<dsl::GridSearch<3>> gdsl_;
   dsl::GridPath<3> path_, optpath_, splinecells_, splineoptcells_;
   std::vector<Eigen::Vector3d> splinepath_, splineoptpath_;
@@ -90,27 +69,16 @@ private:
   ros::Publisher splineoptpath_pub_;
 
   ros::Subscriber set_start_sub_;
-<<<<<<< HEAD
-  ros::Subscriber get_pos_sub_; 
-=======
   ros::Subscriber set_start_odom_sub_;
->>>>>>> updating
   ros::Subscriber set_goal_sub_;
   ros::Subscriber set_frontier_sub;
   ros::Subscriber set_occupied_sub_;
   ros::Subscriber set_unoccupied_sub_;
   ros::Subscriber get_octomap_sub_;
+  ros::Subscriber get_pos_sub_;
 
   ros::Timer timer;
 
-<<<<<<< HEAD
-  Eigen::Vector3d sPose;
-  Eigen::Vector3d gPose;
-  Eigen::Vector3d startPose;
-
-  std::string mesh_filename_;
-=======
->>>>>>> updating
   double cells_per_meter_;
   double spline_step_;
   bool use_gazebo_odom_;

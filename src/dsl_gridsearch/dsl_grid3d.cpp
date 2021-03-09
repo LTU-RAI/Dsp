@@ -26,8 +26,6 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     cells_per_meter_ = 1.;
   if (!nh_private_.getParam ("spline_step_", spline_step_))
     spline_step_ = .1;
-  if (!nh_private_.getParam ("use_textured_mesh", use_textured_mesh_))
-    use_textured_mesh_ = false;
   if (!nh_private_.getParam ("grid_length", grid_length_))
     grid_length_ = -1;
   if (!nh_private_.getParam ("grid_width", grid_width_))
@@ -81,8 +79,6 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   //get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>("/octomap_full", 1,
     &DslGrid3D::octomap_data_callback, this);
 
-  get_pos_sub_ = nh.subscribe<nav_msgs::Odometry>("/spot/odometry", 10, 
-    &DslGrid3D::pos_callback, this, ros::TransportHints().tcpNoDelay());
 
   //timer = nh_private_.createTimer(ros::Duration(5.0), &DslGrid3D::spin, this);
   //ROS_INFO("Spinner started");
@@ -269,32 +265,6 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
   std::cout << std::endl;
 }
 
-void DslGrid3D::spin(const ros::TimerEvent& e)
-{
-  //Perform dsl gridsearch3D
-  ROS_INFO("Building search graph...");
-  std::shared_ptr<dsl::Grid3d> grid_(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
-    ogrid_->getOccupancyMap().get(), 
-    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
-//  std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
-  gdsl_.reset(new dsl::GridSearch<3>(*grid_, dsl::Grid3dConnectivity(*grid_), cost_, true));
-  Eigen::Vector3d pose = ogrid_->positionToDslPosition(gPose);
-  Eigen::Vector3d spose = ogrid_->positionToDslPosition(sPose);
-  ROS_INFO("db pre-start pos: %f %f %f", sPose(0), sPose(1), sPose(2));
-  ROS_INFO("db start pos: %f %f %f", spose(0), spose(1), spose(2));
-  ROS_INFO("db goal pos: %f %f %f", pose(0), pose(1), pose(2));
-  //gdsl_->SetStart(ogrid_->positionToDslPosition(spose));
-   // gdsl_->SetStart(sPose);
-    //gdsl_->SetStart(spose);
-    //gdsl_->SetStart(Eigen::Vector3d(0.1,0,0));
-    gdsl_->SetStart(Eigen::Vector3d((int) spose(0), (int) spose(1), (int) spose(2)));
-  gdsl_->SetGoal(pose);
-  ROS_INFO("Graph built");
-
-  planAllPaths();
-  //ROS_INFO("Path planed");
-  publishAllPaths();
-}
 
 void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
@@ -353,42 +323,6 @@ void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
   //publishAllPaths();
 }
 
-void DslGrid3D::pos_callback(const nav_msgs::OdometryConstPtr& msg)
-{
-    if(startPose(0) == 0.0)
-    {
-        std::cout<<"startPose"<<std::endl;
-        startPose(0) = msg->pose.pose.position.x / res;
-        startPose(1) = msg->pose.pose.position.y / res;
-        startPose(2) = 0; //msg->pose.pose.position.z / res;
-    
-    }
-   Eigen::Vector3d wpos(msg->pose.pose.position.x / res - startPose(0), 
-        msg->pose.pose.position.y / res - startPose(1), 0); 
-
-  ROS_INFO("Set start wpos: %f %f %f", wpos(0), wpos(1), wpos(2));
-  if(!isPosInBounds(wpos))
-  {
-    ROS_WARN("handleSetStart: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
-    return;
-  }
- 
-  ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
-  //start_pos = wpos;
-    start_pos = ogrid_->positionToDslPosition(wpos);
-  //Eigen::Vector3d pos = ogrid_->positionToDslPosition(wpos);
-  //gdsl_->SetStart(start_pos); 
-  //gdsl_->SetStart(wpos);
-
-    start_set = true;
-  //planAllPaths();
-  //publishAllPaths();
-
-  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: handleSetStart. It took me " << time_span.count() << " seconds.";
-  std::cout << std::endl;
-}
 
 void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg){
   using namespace std::chrono;
@@ -445,7 +379,7 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
 
-  if(!isPosInBounds(gPose))
+  if(!isPosInBounds(wpos))
   {
     ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
     return;

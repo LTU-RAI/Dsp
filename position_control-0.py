@@ -5,7 +5,7 @@ import rospy, time
 from nav_msgs.msg import Path
 from math import pi, sin, cos, atan2, sqrt
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Vector3Stamped, Pose
+from geometry_msgs.msg import Vector3Stamped
 import math
 
 WP_SIZE = 0.5
@@ -17,9 +17,9 @@ class Server:
         self.current_time = current_time if current_time is not None else time.time()
         self.last_time = self.current_time
 
-        self.vel_publisher = rospy.Publisher('/pixy/reference', Pose, queue_size = 10)
+        self.vel_publisher = rospy.Publisher('/pixy/reference', Vector3Stamped, queue_size = 10)
 
-        self.vel_msg = Pose()
+        self.vel_msg = Vector3Stamped()
 
         self.waypoint_subscriber = rospy.Subscriber('/dsl_grid3d/optpath', Path, self.waypoint_callback)
 
@@ -68,19 +68,9 @@ class Server:
             self.z_r = self.path.poses[self.wp_index].pose.position.z
 
 
-
-        self.vel_msg.position.x = self.x_r
-        self.vel_msg.position.y = self.y_r
-        self.vel_msg.position.z = self.z_r
-        self.vel_msg.orientation.x = q_x
-        self.vel_msg.orientation.y = q_y
-        self.vel_msg.orientation.z = q_z
-        self.vel_msg.orientation.w = q_w
-
-
-#        self.vel_msg.vector.x = self.x_r
-#        self.vel_msg.vector.y = self.y_r
-#        self.vel_msg.vector.z = self.z_r
+        self.vel_msg.vector.x = self.x_r
+        self.vel_msg.vector.y = self.y_r
+        self.vel_msg.vector.z = self.z_r
 
         print("operatin")
         self.vel_publisher.publish(self.vel_msg)

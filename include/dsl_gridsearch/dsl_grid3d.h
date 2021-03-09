@@ -106,7 +106,7 @@ private:
   double xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
 
   int seq;
-  std::string pwd = "/home/grammers/temp_log/";
+  std::string pwd = "/mnt/3AA8A849A8A8058B/work/spotLTU/Bag/dsl/2021-03-01/dsl7/";
 };
 
 

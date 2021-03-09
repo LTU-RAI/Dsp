@@ -11,21 +11,21 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/pixy/base_link_NWU" />
+		<param name="frame_id" type="string" value="/world" />
 
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="20.0" />
+		<param name="sensor_model/max_range" value="12.0" />
 		
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/pixy/velodyne_points" />
 
-		<param name="pointcloud_[min|max]_z" value="5.0" />
+		<param name="pointcloud_[min|max]_z" value="12.0" />
 
-		<param name="occupancy_[min|max]_z" value="5.0" />
+		<param name="occupancy_[min|max]_z" value="12.0" />
 
 	</node>
-                <!--<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 odom world 100" /-->
+	<!--node pkg="tf" type="static_transform_publisher" name="world2odom2" args="0 0 0 1.5708 -0 0 /cave_world /pixy/base_link 10" /-->
 </launch>
 
         <!--param name="occupancy_min_z" value="-0.5" /-->

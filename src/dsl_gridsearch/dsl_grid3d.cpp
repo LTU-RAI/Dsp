@@ -130,7 +130,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
         outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
         outfile.close();
         
-        publishOccupancyGrid();
+//        publishOccupancyGrid();
         if(start_set and goal_set)
         {
             if(gdsl_->SetStart(start_pos) and gdsl_->SetGoal(goal_pos))
@@ -220,7 +220,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 
   grid_.reset(new dsl::Grid3d(ogrid_->getLength(), ogrid_->getWidth(), ogrid_->getHeight(), 
     ogrid_->getOccupancyMap().get(), 
-    1/cells_per_meter_, 1/cells_per_meter_, 1/cells_per_meter_, 1, 1000));
+    1.0, 1.0, 1.0, 1, 1000));
   std::cout << "ogrid_->getOccupancyMap(): " << ogrid_->getOccupancyMap() << std::endl;
   connectivity_.reset(new dsl::Grid3dConnectivity(*grid_));
   gdsl_.reset(new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true));
@@ -239,7 +239,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
     return;
 
 //  publishAllPaths();
-  publishOccupancyGrid();
+//  publishOccupancyGrid();
   //planAllPaths();
   //publishAllPaths();
 
@@ -501,7 +501,7 @@ void DslGrid3D::planAllPaths()
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
   gdsl_->Plan(path_);
-  gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
+  gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*res_octomap));
   //gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
   //gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
 
@@ -565,11 +565,18 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   double xmin = ogrid_->getPmin()(0) * res_octomap;
   double ymin = ogrid_->getPmin()(1) * res_octomap;
   double zmin = ogrid_->getPmin()(2) * res_octomap;
+//  std::cout << "x " << xmin << " seconds.";
+//  std::cout << "y " << ymin << " seconds.";
+//  std::cout << "z " << zmin << " seconds.\n";
+
   for(int i = 0; i < dsl_path.size(); i++)
   {
-    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin + res_octomap / 2 - 0.25;
-    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin + res_octomap / 2 - 0.25;
-    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin + res_octomap / 2 - 0.25;
+//    std::cout << "dx " << dsl_path[i][0] << " seconds.";
+//    std::cout << "dy " << dsl_path[i][1] << " seconds.";
+//    std::cout << "dz " << dsl_path[i][2] << " seconds.\n";
+    msg.poses[i].pose.position.x = dsl_path[i][0] + xmin; // - res_octomap / 2; // - 0.25;
+    msg.poses[i].pose.position.y = dsl_path[i][1] + ymin; // - res_octomap / 2; // - 0.25;
+    msg.poses[i].pose.position.z = dsl_path[i][2] + zmin; // - res_octomap / 2; // - 0.25;
   }
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -578,68 +585,6 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   std::cout << std::endl;
 
   return msg; 
-}
-
-void DslGrid3D::publishOccupancyGrid()
-{
-  using namespace std::chrono;
-  high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
-  visualization_msgs::Marker occmap_viz;
-
-  std::vector<geometry_msgs::Point> marker_pos;
-  int length = ogrid_->getLength();
-  int width = ogrid_->getWidth();
-  int height = ogrid_->getHeight();
-  for(int x = 0; x < length; x++)
-  {
-    for(int y = 0; y < width; y++)
-    {
-      for(int z = 0; z < height; z++)
-      {
-        int idx = x + y*length + z*length*width;
-        assert(!(idx >= length*width*height || idx < 0));
-        if(ogrid_->getOccupancyMap()[idx] == DSL_OCCUPIED)
-        {
-          //std::cout << "pt occupied: " << x << " " << y << " " << z << std::endl;
-          geometry_msgs::Point pt;
-          pt.x = x/cells_per_meter_ * res_octomap;
-          pt.y = y/cells_per_meter_ * res_octomap;
-          pt.z = z/cells_per_meter_ * res_octomap;
-          marker_pos.push_back(pt);
-        }  
-      }  
-    }
-  }
-
-  occmap_viz.header.frame_id = odom_frame_id_; ///world /pixy/velodyne
-  occmap_viz.header.stamp = ros::Time();
-  occmap_viz.ns = "dsl_grid3d";
-  occmap_viz.id = 1;
-  occmap_viz.type = visualization_msgs::Marker::CUBE_LIST;
-  occmap_viz.action = visualization_msgs::Marker::ADD;
-  occmap_viz.pose.position.x = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(0) * res_octomap + res_octomap/2;
-  occmap_viz.pose.position.y = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(1) * res_octomap + res_octomap/2;
-  occmap_viz.pose.position.z = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(2) * res_octomap + res_octomap/2;
-  occmap_viz.pose.orientation.x = 0.0;
-  occmap_viz.pose.orientation.y = 0.0;
-  occmap_viz.pose.orientation.z = 0.0;
-  occmap_viz.pose.orientation.w = 1.0;
-  occmap_viz.scale.x = 1.0/cells_per_meter_ * res_octomap;
-  occmap_viz.scale.y = 1.0/cells_per_meter_ * res_octomap;
-  occmap_viz.scale.z = 1.0/cells_per_meter_ * res_octomap;
-  occmap_viz.color.a = 0.5;
-  occmap_viz.color.r = 1.0;
-  occmap_viz.color.g = 0.0;
-  occmap_viz.color.b = 0.0;
-  occmap_viz.points = marker_pos;
-
-  occ_map_viz_pub_.publish(occmap_viz);
-
-  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: publishOccupancyGrid. It took me " << time_span.count() << " seconds.";
-  std::cout << std::endl;
 }
 
 } // namespace

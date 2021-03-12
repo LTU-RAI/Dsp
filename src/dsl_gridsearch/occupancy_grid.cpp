@@ -201,7 +201,7 @@ void OccupancyGrid::mergeGrid(OccupancyGrid* ogrid)
     new_pmax(2) = max_gpos(2);
   }
 
-  std::shared_ptr <double[]> new_occupancy_map(new double[new_length*new_width*new_height]);
+  std::shared_ptr<double[]> new_occupancy_map(new double[new_length*new_width*new_height]);
   for(int i = 0; i < new_length*new_width*new_height; i++)
   {
     new_occupancy_map[i] = 0;

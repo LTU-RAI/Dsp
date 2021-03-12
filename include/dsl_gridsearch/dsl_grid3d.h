@@ -5,6 +5,7 @@
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
+#include <exploration/Frontier.h>
 
 #include "dsl/gridsearch.h"
 #include "dsl/gridcost.h"
@@ -13,14 +14,12 @@
 #include "dsl_gridsearch/occupancy_grid.h"
 
 
-#include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <octomap_msgs/Octomap.h>
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
 
 #include <memory>
-#include <tf/transform_datatypes.h>
 
 namespace dsl_gridsearch
 {
@@ -34,10 +33,14 @@ private:
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
   void handleSetStartOdom(const nav_msgs::Odometry msg);
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
+  void handleSetFrontier(const exploration::FrontierConstPtr& msg);
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
   void spin(const ros::TimerEvent& e);
   void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
+
+  void handleSetOccupied(Eigen::Vector3d wpos);
+  void handleSetUnoccupied(Eigen::Vector3d wpos);
 
   void publishAllPaths();
   void publishOccupancyGrid();
@@ -68,9 +71,11 @@ private:
   ros::Subscriber set_start_sub_;
   ros::Subscriber set_start_odom_sub_;
   ros::Subscriber set_goal_sub_;
+  ros::Subscriber set_frontier_sub;
   ros::Subscriber set_occupied_sub_;
   ros::Subscriber set_unoccupied_sub_;
   ros::Subscriber get_octomap_sub_;
+  ros::Subscriber get_pos_sub_;
 
   ros::Timer timer;
 
@@ -82,13 +87,25 @@ private:
   int grid_length_;
   int grid_width_;
   int grid_height_;
+  int length_metric;
+  int width_metric;
+  int height_metric;
   double res_octomap;
-
+  std::shared_ptr<double[]> occupancy_map;
+  
   Eigen::Matrix<double, 3,3> rot;
   Eigen::Vector3d first_pos;
   Eigen::Vector3d start_pos;
   Eigen::Vector3d goal_pos;
   bool start_set = false;
+  bool goal_set = false;
+  double length = -1.0;
+  double width = -1.0;
+  double height = -1.0;
+  double xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
+
+  int seq;
+  std::string pwd = "/home/grammers/temp_log/";
 };
 
 

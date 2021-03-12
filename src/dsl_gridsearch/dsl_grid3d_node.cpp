@@ -9,7 +9,13 @@ int main (int argc, char **argv)
 
   dsl_gridsearch::DslGrid3D dslg3d(nh, nh_private);
 
+    //ros::MultiThreadedSpinner spinner(0);
+    //spinner.spin();
+    //ros::AsyncSpinner spinner(0);
+    //spinner.start();
+    //ros::waitForShutdown();
   ros::spin();
+
 
   return 0;
 }

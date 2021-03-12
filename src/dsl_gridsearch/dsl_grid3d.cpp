@@ -598,9 +598,9 @@ void DslGrid3D::publishOccupancyGrid()
         {
           //std::cout << "pt occupied: " << x << " " << y << " " << z << std::endl;
           geometry_msgs::Point pt;
-          pt.x = x/cells_per_meter_ * res_octomap;
-          pt.y = y/cells_per_meter_ * res_octomap;
-          pt.z = z/cells_per_meter_ * res_octomap;
+          pt.x = x * res_octomap;
+          pt.y = y * res_octomap;
+          pt.z = z * res_octomap;
           marker_pos.push_back(pt);
         }  
       }  
@@ -613,16 +613,16 @@ void DslGrid3D::publishOccupancyGrid()
   occmap_viz.id = 1;
   occmap_viz.type = visualization_msgs::Marker::CUBE_LIST;
   occmap_viz.action = visualization_msgs::Marker::ADD;
-  occmap_viz.pose.position.x = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(0) * res_octomap + res_octomap/2;
-  occmap_viz.pose.position.y = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(1) * res_octomap + res_octomap/2;
-  occmap_viz.pose.position.z = 0.0/(2.*cells_per_meter_) + ogrid_->getPmin()(2) * res_octomap + res_octomap/2;
+  occmap_viz.pose.position.x = 0.5 * res_octomap + ogrid_->getPmin()(0) * res_octomap; 
+  occmap_viz.pose.position.y = 0.5 * res_octomap + ogrid_->getPmin()(1) * res_octomap;
+  occmap_viz.pose.position.z = 0.5 * res_octomap + ogrid_->getPmin()(2) * res_octomap;
   occmap_viz.pose.orientation.x = 0.0;
   occmap_viz.pose.orientation.y = 0.0;
   occmap_viz.pose.orientation.z = 0.0;
   occmap_viz.pose.orientation.w = 1.0;
-  occmap_viz.scale.x = 1.0/cells_per_meter_ * res_octomap;
-  occmap_viz.scale.y = 1.0/cells_per_meter_ * res_octomap;
-  occmap_viz.scale.z = 1.0/cells_per_meter_ * res_octomap;
+  occmap_viz.scale.x = 1.0 * res_octomap;
+  occmap_viz.scale.y = 1.0 * res_octomap;
+  occmap_viz.scale.z = 1.0 * res_octomap;
   occmap_viz.color.a = 0.5;
   occmap_viz.color.r = 1.0;
   occmap_viz.color.g = 0.0;

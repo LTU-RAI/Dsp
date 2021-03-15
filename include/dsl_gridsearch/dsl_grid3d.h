@@ -32,8 +32,12 @@ public:
 private:
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
   void handleSetStartOdom(const nav_msgs::Odometry msg);
+  void setStart(Eigen::Vector3d wpos);
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
   void handleSetFrontier(const exploration::FrontierConstPtr& msg);
+  void setGoal(Eigen::Vector3d wpos);
+  Eigen::Vector3d posRes(Eigen::Vector3d wpos);
+
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
   void spin(const ros::TimerEvent& e);
@@ -49,7 +53,6 @@ private:
   nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path);
   nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
   bool isPosInBounds(const Eigen::Vector3d& pos);
-  boost::shared_ptr<geometry_msgs::Point const> setGoal;
 
   std::shared_ptr<dsl::Grid3d> grid_;
   dsl::GridCost<3> cost_;

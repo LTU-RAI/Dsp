@@ -30,6 +30,9 @@ public:
   DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private);
 
 private:
+  void updateGDSL(std::shared_ptr<octomap::OcTree> tree);
+  void buildGDSL(std::shared_ptr<octomap::OcTree> tree);
+
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
   void handleSetStartOdom(const nav_msgs::Odometry msg);
   void setStart(Eigen::Vector3d wpos);
@@ -60,7 +63,7 @@ private:
   std::shared_ptr<dsl::GridSearch<3>> gdsl_;
   dsl::GridPath<3> path_, optpath_, splinecells_, splineoptcells_;
   std::vector<Eigen::Vector3d> splinepath_, splineoptpath_;
-  std::shared_ptr<OccupancyGrid> ogrid_;
+  //std::shared_ptr<OccupancyGrid> ogrid_;
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -106,6 +109,8 @@ private:
   double width = -1.0;
   double height = -1.0;
   double xmin, ymin, zmin, xmax, ymax, zmax, cells_per_meter;
+  Eigen::Vector3d pmin;
+  Eigen::Vector3d pmax;
 
   int seq;
   std::string pwd = "/home/grammers/temp_log/";

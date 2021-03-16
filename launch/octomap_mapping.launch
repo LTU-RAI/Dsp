@@ -26,7 +26,7 @@
 		<param name="occupancy_[min|max]_z" value="20.0" />
 
 	</node>
-                <!--<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 odom world 100" /-->
+                <!--node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 /world /odom 10" /-->
 </launch>
 
         <!--param name="occupancy_min_z" value="-0.5" /-->

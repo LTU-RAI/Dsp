@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!-- 
   Example launch file for octomap_server mapping: 
   Listens to incoming PointCloud2 data and incrementally builds an octomap. 
@@ -11,7 +12,7 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/pixy/base_link_NWU" />
+		<param name="frame_id" type="string" value="/world" />
 
 		
 		<!-- maximum range to integrate (speedup!) -->

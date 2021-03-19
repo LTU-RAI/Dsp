@@ -21,9 +21,9 @@
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/pixy/velodyne_points" />
 
-		<param name="pointcloud_[min|max]_z" value="5.0" />
+		<!--param name="pointcloud_[min|max]_z" value="5.0" /-->
 
-		<param name="occupancy_[min|max]_z" value="5.0" />
+		<!--param name="occupancy_[min|max]_z" value="5.0" /-->
 
 	</node>
                 <!--<node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 odom world 100" /-->

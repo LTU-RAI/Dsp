@@ -20,7 +20,7 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_(nh),
   nh_private_(nh_private)
 {
-        
+  ROS_INFO("DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private)");        
   double grid_xmin, grid_ymin, grid_zmin;
 
   if (!nh_private_.getParam ("cells_per_meter", cells_per_meter_))
@@ -90,6 +90,7 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
 void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 {	
+  ROS_INFO("DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)");        
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -97,17 +98,17 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 
     // This can be cast to other types. An octree seems to be appropriate for publishing
     std::shared_ptr<octomap::OcTree> tree(dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg)));
-	std::cout << "resolution: " << tree->getResolution() << std::endl;
+/*	std::cout << "resolution: " << tree->getResolution() << std::endl;
 	std::cout << "type: " << tree->getTreeType() << std::endl;
 	std::cout << "size: " << tree->size() << std::endl;
-
+*/
     res_octomap = tree->getResolution();
     double length_test, width_test, height_test;
     tree->getMetricSize(length_test, width_test, height_test);
     tree->getMetricMin(pmin(0), pmin(1), pmin(2));
     tree->getMetricMax(pmax(0), pmax(1), pmax(2));
 
-    ROS_INFO("l %f, w %f, h %f\nl %f, w %f, h %f", length_test, width_test, height_test, length, width, height);
+//    ROS_INFO("l %f, w %f, h %f\nl %f, w %f, h %f", length_test, width_test, height_test, length, width, height);
     if (length_test * width_test * height_test == length * width * height)
     {
         updateGDSL(tree);
@@ -119,24 +120,22 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
         height = height_test;
         buildGDSL(tree);
     }
-
-
-
 }
 
 void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
 {
+  ROS_INFO("DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
     int count = 0;
-    std::cout << "Metric size. length: " << length/res_octomap << " width: " << width/res_octomap << " height: " << height/res_octomap << std::endl;
+//    std::cout << "Metric size. length: " << length/res_octomap << " width: " << width/res_octomap << " height: " << height/res_octomap << std::endl;
     length_metric = length/res_octomap;
     width_metric = width/res_octomap;
     height_metric = height/res_octomap;
 
     //const double occupied_val = DSL_OCCUPIED;
     int size = length_metric * width_metric * height_metric;
-    std::cout<<"Size: "<<size<<std::endl;
+//    std::cout<<"Size: "<<size<<std::endl;
     occupancy_map.reset(new double[size]);
 
    for(int i = 0; i < size; i++)
@@ -163,7 +162,7 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
 			occupancy_map[idx] = DSL_OCCUPIED;
 		}			
     }
-    std::cout << "count: " << count << std::endl;
+//    std::cout << "count: " << count << std::endl;
 
     //Bound occupancy_map from top and bottom
 /*	for(int x = 0; x < ogrid_->getLength(); x++)
@@ -183,19 +182,19 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
         }
 	}
 */
-	std::cout << "Grid Bounds: " << pmin.transpose() << " and " 
-    << pmax.transpose() << std:: endl;
+//	std::cout << "Grid Bounds: " << pmin.transpose() << " and " 
+//    << pmax.transpose() << std:: endl;
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: Build OccupancyGrid. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: Build OccupancyGrid. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-
+*/
 
   //Perform dsl gridsearch3D
   high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
-  ROS_INFO("Building search graph...");
+//  ROS_INFO("Building search graph...");
   grid_.reset(new dsl::Grid3d(length_metric, width_metric, height_metric, 
     occupancy_map.get(),
     1, 1, 1, 1, DSL_OCCUPIED + 1));
@@ -206,9 +205,9 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
 
   high_resolution_clock::time_point t4 = high_resolution_clock::now();
   time_span = duration_cast<duration<double>>(t4 - t3);
-  std::cout << "----LOG: Building DSL search graph. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: Building DSL search graph. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-
+*/
     std::ofstream outfile;
     outfile.open(pwd + "rebuild_time_volumeMapM_seq.log", std::ios::app);
     outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
@@ -222,16 +221,17 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
 
   high_resolution_clock::time_point t5 = high_resolution_clock::now();
   time_span = duration_cast<duration<double>>(t5 - t1);
-  std::cout << "----LOG: octomap_data_callback. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: octomap_data_callback. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-
+*/
 }
 
 void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 {
-    using namespace std::chrono;
+  ROS_INFO("DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)");
+  using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-        high_resolution_clock::time_point re = high_resolution_clock::now();
+       high_resolution_clock::time_point re = high_resolution_clock::now();
        for(octomap::OcTree::leaf_iterator it = tree->begin_leafs(), end = tree->end_leafs(); it != end; ++it)
         {
             //int x = (it.getX() - xmin) / res_octomap;
@@ -264,7 +264,7 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 
         high_resolution_clock::time_point re2 = high_resolution_clock::now();
         duration<double> time_span = duration_cast<duration<double>>(re2 - re);
-        std::cout<<"----LOG: update took me "<< time_span.count()<<std::endl;
+//        std::cout<<"----LOG: update took me "<< time_span.count()<<std::endl;
 
         std::ofstream outfile;
         outfile.open(pwd + "fullUpdate_time_volumeMapM_seq.log", std::ios::app);
@@ -290,6 +290,7 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 
 void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
+  ROS_INFO("DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)");
   //Eigen::Vector3d wpos(msg.pose.pose.position.x / res_octomap, msg.pose.pose.position.y / res_octomap, msg.pose.pose.position.z / res_octomap);
   Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
   setStart(wpos);
@@ -298,36 +299,39 @@ void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 
 void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
-    //Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
-    Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
-    setStart(wpos);
+  ROS_INFO("DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)");
+  //Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
+  Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
+  setStart(wpos);
 }
 
 void DslGrid3D::setStart(Eigen::Vector3d wpos)
 {
-    wpos = posRes(wpos);
+  ROS_INFO("DslGrid3D::setStart(Eigen::Vector3d wpos)");
+  wpos = posRes(wpos);
 
-    if(!isPosInBounds(wpos))
-    {
-        ROS_WARN("handleSetStartOdom: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
-        //start_set = false;
-        return;
-    }
-    ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
-    start_pos = wpos; 
-    start_set = true;
-
+  if(!isPosInBounds(wpos))
+  {
+      ROS_WARN("handleSetStartOdom: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
+      //start_set = false;
+      return;
+  }
+//  ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
+  start_pos = wpos; 
+  start_set = true;
 }
 
-void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg){
-    //Eigen::Vector3d wpos(msg->point.x / res_octomap, msg->point.y / res_octomap, msg->point.z / res_octomap);
-    Eigen::Vector3d wpos(msg->point.x, msg->point.y, msg->point.z);
-    setGoal(wpos);
-
+void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg)
+{
+  ROS_INFO("DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg)");
+  //Eigen::Vector3d wpos(msg->point.x / res_octomap, msg->point.y / res_octomap, msg->point.z / res_octomap);
+  Eigen::Vector3d wpos(msg->point.x, msg->point.y, msg->point.z);
+  setGoal(wpos);
 }
 
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
+  ROS_INFO("DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)");
   //Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
   Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
   setGoal(wpos);
@@ -335,6 +339,7 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 
 void DslGrid3D::setGoal(Eigen::Vector3d wpos)
 {
+    ROS_INFO("DslGrid3D::setGoal(Eigen::Vector3d wpos)");
     wpos = posRes(wpos);
     if(!isPosInBounds(wpos))
     {
@@ -370,11 +375,11 @@ void DslGrid3D::setGoal(Eigen::Vector3d wpos)
 
   planAllPaths();
   publishAllPaths();
-
 }
 
 Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
 {
+    ROS_INFO("Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)");
     for (int i = 0; i < 3; i++)
     {
         wpos(i) = (wpos(i) - pmin(i)) / res_octomap;
@@ -382,17 +387,17 @@ Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
     }
 
     return wpos;
-
 }
 
 void DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)
 {
+  ROS_INFO("DslGrid3D::handleSetOccupied(const geometry_msgs::PointConstPtr& msg)");
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
   DslGrid3D::handleSetOccupied(wpos);
 }
 void DslGrid3D::handleSetOccupied(Eigen::Vector3d wpos)
 {
-
+  ROS_INFO("DslGrid3D::handleSetOccupied(Eigen::Vector3d wpos)");
   //if(!isPosInBounds(wpos))
   //{
   //  ROS_WARN("handleSetOccupied: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
@@ -411,13 +416,14 @@ void DslGrid3D::handleSetOccupied(Eigen::Vector3d wpos)
 
 void DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)
 {
+  ROS_INFO("DslGrid3D::handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg)");
   Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
   handleSetUnoccupied(wpos);
 }
 
 void DslGrid3D::handleSetUnoccupied(Eigen::Vector3d wpos)
 {
-
+  ROS_INFO("DslGrid3D::handleSetUnoccupied(Eigen::Vector3d wpos)");
   //if(!isPosInBounds(wpos))
   //{
   //  ROS_WARN("handleSetUnoccupied: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
@@ -437,6 +443,7 @@ void DslGrid3D::handleSetUnoccupied(Eigen::Vector3d wpos)
 // fix test sow it test agenst gdsl
 bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)
 {
+  ROS_INFO("bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
     return true;
@@ -450,25 +457,28 @@ bool DslGrid3D::isPosInBounds(const Eigen::Vector3d& pos)
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: isPosInBounds. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: isPosInBounds. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
+*/
 }
 
 void DslGrid3D::planAllPaths()
 {
+  ROS_INFO("DslGrid3D::planAllPaths()");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
   gdsl_->Plan(path_);
+  //gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*res_octomap));
   //gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
   //gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
   //gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: planAllPaths. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: planAllPaths. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-    
+*/    
     std::ofstream outfile;
     outfile.open(pwd + "pathPlaning_time_volumeMapM_seq.log", std::ios::app);
     outfile<<time_span.count()<<"\t"<<length_metric * width_metric * height_metric<<"\t"<<seq<<std::endl;
@@ -478,6 +488,7 @@ void DslGrid3D::planAllPaths()
 
 void DslGrid3D::publishAllPaths()
 {
+  ROS_INFO("DslGrid3D::publishAllPaths()");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -488,13 +499,14 @@ void DslGrid3D::publishAllPaths()
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: publishAllPaths. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: publishAllPaths. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-
+*/
 }
 
 nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)
 {
+  ROS_INFO("nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -504,16 +516,17 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)
     path.push_back(dsl_path.cells[i].c * res_octomap);
   }
 
-
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: dslPathToRosMsg1. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: dslPathToRosMsg1. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-
+*/
   return dslPathToRosMsg(path);
 }
+
 nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path)
 {
+  ROS_INFO("nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path)");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -530,14 +543,15 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: dslPathToRosMsg2. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: dslPathToRosMsg2. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
-
+*/
   return msg; 
 }
 
 void DslGrid3D::publishOccupancyGrid()
 {
+  ROS_INFO("DslGrid3D::publishOccupancyGrid()");
   using namespace std::chrono;
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -601,8 +615,9 @@ void DslGrid3D::publishOccupancyGrid()
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-  std::cout << "----LOG: publishOccupancyGrid. It took me " << time_span.count() << " seconds.";
+/*  std::cout << "----LOG: publishOccupancyGrid. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
+*/
 }
 
 } // namespace

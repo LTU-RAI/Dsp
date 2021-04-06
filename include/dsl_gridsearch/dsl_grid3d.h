@@ -90,6 +90,7 @@ private:
   bool use_gazebo_odom_;
   std::string odom_topic_;
   std::string odom_frame_id_;
+  int DSL_UNKNOWN;
   int grid_length_;
   int grid_width_;
   int grid_height_;

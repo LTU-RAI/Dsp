@@ -32,6 +32,7 @@ public:
 private:
   void updateGDSL(std::shared_ptr<octomap::OcTree> tree);
   void buildGDSL(std::shared_ptr<octomap::OcTree> tree);
+  void saftyMarginal(Eigen::Vector3d pos, bool update);
 
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
   void handleSetStartOdom(const nav_msgs::Odometry msg);

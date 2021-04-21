@@ -161,15 +161,17 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
 	    //std::cout << "Metric. x: " << x << " y: " << y << " z: " << z << std::endl;
 	//			std::cout << "idx: " << idx << std::endl;
 		assert(!(idx > length_metric*width_metric*height_metric || idx <= 0));
+                saftyMarginal(pos, false);
 		occupancy_map[idx] = DSL_OCCUPIED;
 	    }
-            else {
+            else if (occupancy_map[idx] >= DSL_UNKNOWN ){
 	        occupancy_map[idx] = 0;
             
             }
 
     }
-//    std::cout << "count: " << count << std::endl;
+
+    //std::cout << "count: " << std::endl;
 
     //Bound occupancy_map from top and bottom
 /*	for(int x = 0; x < ogrid_->getLength(); x++)
@@ -201,7 +203,7 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
   //Perform dsl gridsearch3D
   //high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
-//  ROS_INFO("Building search graph...");
+  ROS_INFO("Building search graph...");
   grid_.reset(new dsl::Grid3d(length_metric, width_metric, height_metric, 
     occupancy_map.get(),
     1, 1, 1, 1, DSL_OCCUPIED + 1));
@@ -255,11 +257,12 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
             {
                 //Eigen::Vector3d wpos(x, y, z);
                 //Eigen::Vector3i wpos(it.getX()/res_octomap, it.getY()/res_octomap, it.getZ()/res_octomap);
+                saftyMarginal(pos, false);
                 gdsl_->SetCost(pos, DSL_OCCUPIED);
                 occupancy_map[idx] = DSL_OCCUPIED;
                // DslGrid3D::handleSetOccupied(wpos); 
             }			
-            else if(!tree->isNodeOccupied(*it) and occupancy_map[idx] != 0)
+            else if((!tree->isNodeOccupied(*it) and occupancy_map[idx] != 0) and occupancy_map[idx] >= DSL_UNKNOWN)
             {
                 //Eigen::Vector3d wpos(x, y, z);
                 //gdsl_->SetCost(it.getCoordinate(), 0);
@@ -292,6 +295,35 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 
         return;
 
+}
+
+void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
+{
+    //std::cout<<"safty: "<< update << std::endl;
+    for(int i = -2; i < 2; i++){
+        for(int j = -2; j < 2; j++){
+            for(int k = -2; k < 2; k++){
+                int x = pos(0) + i;
+                int y = pos(1) + j;
+                int z = pos(2) + k;
+	        int idx = (int) pos(0) + i + ((int) pos(1) + j)*length_metric + ((int) pos(2) + k)*length_metric*width_metric;
+                //if(idx > 0 && idx < length_metric*width_metric*height_metric){
+                if(x > 0 && x < length_metric && y > 0 && y < width_metric && z > 0 && z < height_metric){
+                    int sum = i * i + j * j + k * k;
+                    if (!sum){
+                        continue;
+                    }
+                    int cost = DSL_UNKNOWN / (i * i + j * j + k * k);
+                    if(occupancy_map[idx] < cost or occupancy_map[idx] == DSL_UNKNOWN){
+                        occupancy_map[idx] = DSL_UNKNOWN / (i * i + j * j + k * k);
+                        if(update){
+                            gdsl_->SetCost(pos, DSL_UNKNOWN / (i * i + j * j + k * k));
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 

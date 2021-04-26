@@ -21,6 +21,8 @@
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/pixy/velodyne_points" />
 
+                <param name="publish_free_space" value="true"/>
+
 		<!--param name="pointcloud_[min|max]_z" value="5.0" /-->
 
 		<!--param name="occupancy_[min|max]_z" value="5.0" /-->

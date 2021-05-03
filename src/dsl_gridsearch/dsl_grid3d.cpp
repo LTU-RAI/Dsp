@@ -96,7 +96,6 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
   //using namespace std::chrono;
   //high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-    seq = msg->header.seq;
 
     // This can be cast to other types. An octree seems to be appropriate for publishing
     std::shared_ptr<octomap::OcTree> tree(dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg)));
@@ -117,12 +116,15 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
     }
     else
     {
+
         length = length_test;
         width = width_test;
         height = height_test;
         buildGDSL(tree);
+        grid_built = true;
     }
     publishOccupancyGrid();
+    setAndPublishPath();
 }
 
 void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
@@ -299,17 +301,27 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
         //outfile.close();
         
         //publishOccupancyGrid();
+    //setAndPublishPath();
+    /*
     if(start_set and goal_set)
     {
-        if(gdsl_->SetStart(start_pos) and gdsl_->SetGoal(goal_pos))
+        if((int) start_pos(0) == (int) goal_pos(0)
+            and (int) start_pos(1) == (int) goal_pos(1)
+            and (int) start_pos(2) == (int) goal_pos(2))
+        {
+            ROS_WARN("Start and goal poses are the some");
+            return;
+        }
+        else if(gdsl_->SetStart(start_pos) and gdsl_->SetGoal(goal_pos))
         {
             //std::cout<<"crach track 1"<<std::endl;
             planAllPaths();
             publishAllPaths();
         }
     }
-
+    */
     return;
+    
 
 }
 
@@ -345,8 +357,6 @@ void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
 
 void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
-  //ROS_INFO("DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)");
-  //Eigen::Vector3d wpos(msg.pose.pose.position.x / res_octomap, msg.pose.pose.position.y / res_octomap, msg.pose.pose.position.z / res_octomap);
   Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
   setStart(wpos);
 }
@@ -354,93 +364,72 @@ void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
 
 void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
-  //ROS_INFO("DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)");
-  //Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
   Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
   setStart(wpos);
 }
 
 void DslGrid3D::setStart(Eigen::Vector3d wpos)
 {
-  //ROS_INFO("DslGrid3D::setStart(Eigen::Vector3d wpos)");
-  wpos = posRes(wpos);
-
-  if(!isPosInBounds(wpos))
-  {
-      ROS_WARN("handleSetStartOdom: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
-      //start_set = false;
-      return;
-  }
-//  ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
+  //ROS_INFO("Set start pos: %f %f %f", wpos(0), wpos(1), wpos(2));
   start_pos = wpos; 
-  start_set = true;
+  setAndPublishPath();
 }
 
 void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg)
 {
-  ////ROS_INFO("DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg)");
-  //Eigen::Vector3d wpos(msg->point.x / res_octomap, msg->point.y / res_octomap, msg->point.z / res_octomap);
   Eigen::Vector3d wpos(msg->point.x, msg->point.y, msg->point.z);
   setGoal(wpos);
 }
 
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
-  //ROS_INFO("DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)");
-  //Eigen::Vector3d wpos(msg->x/res_octomap, msg->y/res_octomap, msg->z/res_octomap);
   Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
   setGoal(wpos);
 }
 
 void DslGrid3D::setGoal(Eigen::Vector3d wpos)
 {
-    //ROS_INFO("DslGrid3D::setGoal(Eigen::Vector3d wpos)");
-    wpos = posRes(wpos);
-    if(!isPosInBounds(wpos))
-    {
-        ROS_WARN("handleSetGoal: Position %f %f %f out of bounds!", wpos(0), wpos(1), wpos(2));
-        return;
-    } 
-    if(!start_set){
+    //ROS_INFO("Set goal pos: %f %f %f", wpos(0), wpos(1), wpos(2));
+    goal_pos = wpos; 
+    setAndPublishPath();
+}
+
+void DslGrid3D::setAndPublishPath(){
+    if(!grid_built){
         return;
     }
+    Eigen::Vector3d grid_start = posRes(start_pos);
+    Eigen::Vector3d grid_goal = posRes(goal_pos);
 
-    ROS_INFO("Set goal pos: %f %f %f", wpos(0), wpos(1), wpos(2));
-    //goal_pos = wpos;
-    goal_pos = wpos; 
-    //ROS_INFO("Set dsl goal pos: %f %f %f", goal_pos(0), goal_pos(1), goal_pos(2));
-    if((int) start_pos(0) == (int) goal_pos(0)
-        and (int) start_pos(1) == (int) goal_pos(1)
-        and (int) start_pos(2) == (int) goal_pos(2))
+    if((int) grid_start(0) == (int) grid_goal(0)
+        and (int) grid_start(1) == (int) grid_goal(1)
+        and (int) grid_start(2) == (int) grid_goal(2))
     {
         ROS_WARN("Start and goal poses are the some");
         return;
     }
-    if (!gdsl_->SetStart(start_pos))
+    if (!gdsl_->SetStart(grid_start))
     {
         ROS_WARN("SetStart faild");
         return;
     }
-    if (!gdsl_->SetGoal(goal_pos))
+    if (!gdsl_->SetGoal(grid_goal))
     {
         ROS_WARN("SetGoal faild");
         return;
     }
-    goal_set = true;
 
-  planAllPaths();
-  publishAllPaths();
+    planAllPaths();
+    publishAllPaths();
+
 }
 
 Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
 {
-    //ROS_INFO("Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)");
     for (int i = 0; i < 3; i++)
     {
         wpos(i) = (wpos(i) - pmin(i)) / res_octomap;
-        //wpos(i) = round((wpos(i) - pmin(i)) / res_octomap);
     }
-
     return wpos;
 }
 

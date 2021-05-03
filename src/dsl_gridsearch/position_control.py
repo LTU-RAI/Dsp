@@ -93,6 +93,7 @@ class Server:
         print("operatin")
         self.vel_publisher.publish(self.vel_msg)
         return
+
 if __name__ == "__main__":
     try:
         rospy.init_node('position_control', anonymous=True)

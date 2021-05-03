@@ -166,8 +166,8 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
                         saftyMarginal(p, false);
 		        occupancy_map[idx] = DSL_OCCUPIED;
 	            }
-                    else if (occupancy_map[idx] == DSL_UNKNOWN){
-	                occupancy_map[idx] = 1;
+                    else if (occupancy_map[idx] >= DSL_UNKNOWN){
+                        occupancy_map[idx] = occupancy_map[idx] - DSL_UNKNOWN + 1;
                     }
                     k++;
                 } while (k < n/2);
@@ -273,13 +273,14 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
                         occupancy_map[idx] = DSL_OCCUPIED;
                // DslGrid3D::handleSetOccupied(wpos); 
                     }			
-                    else if(!tree->isNodeOccupied(*it)  and occupancy_map[idx] == DSL_UNKNOWN)
+                    else if(!tree->isNodeOccupied(*it)  and occupancy_map[idx] >= DSL_UNKNOWN and occupancy_map[idx] < DSL_OCCUPIED)
             //else if((!tree->isNodeOccupied(*it) and occupancy_map[idx] != 1) and occupancy_map[idx] >= DSL_UNKNOWN)
                     {
                 //Eigen::Vector3d wpos(x, y, z);
                 //gdsl_->SetCost(it.getCoordinate(), 0);
-                        gdsl_->SetCost(p, 1);
-                        occupancy_map[idx] = 1;
+                        gdsl_->SetCost(p, occupancy_map[idx] - DSL_UNKNOWN + 1);
+                        occupancy_map[idx] = occupancy_map[idx] - DSL_UNKNOWN + 1;
+                        //std::cout<<occupancy_map[idx]<<std::endl;
                 //DslGrid3D::handleSetUnoccupied(wpos); 
                     }
                     k++;
@@ -334,19 +335,28 @@ void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
                 int x = pos(0) + i;
                 int y = pos(1) + j;
                 int z = pos(2) + k;
-	        int idx = (int) pos(0) + i + ((int) pos(1) + j)*length_metric + ((int) pos(2) + k)*length_metric*width_metric;
-                //if(idx > 0 && idx < length_metric*width_metric*height_metric){
-                if(x > 0 && x < length_metric && y > 0 && y < width_metric && z > 0 && z < height_metric){
+	        //int idx = (int) pos(0) + i + ((int) pos(1) + j)*length_metric + ((int) pos(2) + k)*length_metric*width_metric;
+                //why will grid build crach when z >= 0
+                if(x >= 0 && x < length_metric && y >= 0 && y < width_metric && z > 0 && z < height_metric){
+	            int idx = x + y*length_metric + z*length_metric*width_metric;
                     int sum = i * i + j * j + k * k;
                     if (!sum){
                         continue;
                     }
-                    int cost = DSL_UNKNOWN / (sum + 1);
-                    if(occupancy_map[idx] < cost or occupancy_map[idx] == DSL_UNKNOWN){
+                    int cost = DSL_UNKNOWN / (sum + 2);
+                    if(occupancy_map[idx] < cost){
                         occupancy_map[idx] = cost;
                         if(update){
                             gdsl_->SetCost(pos, cost);
                         }
+                    }
+                    else if (DSL_UNKNOWN == occupancy_map[idx] or (occupancy_map[idx] > DSL_UNKNOWN and occupancy_map[idx] < DSL_OCCUPIED)){
+                        cost += DSL_UNKNOWN;
+                        occupancy_map[idx] = cost;
+                        if(update){
+                            gdsl_->SetCost(pos, cost);
+                        }
+                        
                     }
                 }
             }
@@ -621,8 +631,11 @@ void DslGrid3D::publishOccupancyGrid()
         //}
 
         //std::cout<<"check 01: "<<gdsl_->GetCost(pos)<<std::endl;
-        //if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
-        if(gdsl_->GetCost(pos) == 1)
+        if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
+        //if(gdsl_->GetCost(pos) == DSL_UNKNOWN)
+        //if(gdsl_->GetCost(pos) == 1)
+        //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
+        //if(gdsl_->GetCost(pos) < DSL_OCCUPIED and gdsl_->GetCost(pos) > DSL_UNKNOWN)
         {
           //std::cout << "pt occupied: " << x << " " << y << " " << z << std::endl;
           geometry_msgs::Point pt;

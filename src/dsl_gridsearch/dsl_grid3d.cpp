@@ -522,12 +522,16 @@ void DslGrid3D::planAllPaths()
   //using namespace std::chrono;
   //high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-  gdsl_->Plan(path_);
-  gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*res_octomap));
-  //gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
-  gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
-  gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
-
+    gdsl_->Plan(path_);
+    gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
+    if (path_.cells.size() > 5){
+        gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
+        gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
+    } else {
+        std::cout<<"catch"<<std::endl;
+        optpath_ = path_;
+        splineoptpath_ = splinepath_;
+    }
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
   //duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 /*  std::cout << "----LOG: planAllPaths. It took me " << time_span.count() << " seconds.";

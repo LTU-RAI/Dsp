@@ -44,8 +44,8 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     use_gazebo_odom_ = false;
     if (!nh_private_.getParam ("odom_topic", odom_topic_))
         odom_topic_ = "/pixy/truth/NWU";
-/*  if (!nh_private_.getParam ("spline_step_", spline_step_))
-    spline_step_ = .1;*/
+  if (!nh_private_.getParam ("spline_step_", spline_step_))
+    spline_step_ = .1;
   if (!nh_private_.getParam ("odom_frame_id", odom_frame_id_))
     odom_frame_id_ = "odom";
   if (!nh_private_.getParam ("unknown_value", DSL_UNKNOWN))
@@ -523,10 +523,10 @@ void DslGrid3D::planAllPaths()
   //high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
   gdsl_->Plan(path_);
-  //gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*res_octomap));
+  gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*res_octomap));
   //gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
-  //gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
-  //gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
+  gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
+  gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
 
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
   //duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
@@ -546,10 +546,10 @@ void DslGrid3D::publishAllPaths()
   //using namespace std::chrono;
   //high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-  path_pub_.publish(dslPathToRosMsg(path_));
-  optpath_pub_.publish(dslPathToRosMsg(optpath_)); 
-  //splinepath_pub_.publish(dslPathToRosMsg(splinepath_)); 
-  //splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_)); 
+  path_pub_.publish(dslPathToRosMsg(path_, false));
+  optpath_pub_.publish(dslPathToRosMsg(optpath_, false)); 
+  splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
+  splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_, true)); 
 
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
   //duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
@@ -558,7 +558,7 @@ void DslGrid3D::publishAllPaths()
 */
 }
 
-nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)
+nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path, bool isSplined)
 {
   //ROS_INFO("nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)");
   //using namespace std::chrono;
@@ -575,10 +575,10 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path)
 /*  std::cout << "----LOG: dslPathToRosMsg1. It took me " << time_span.count() << " seconds.";
   std::cout << std::endl;
 */
-  return dslPathToRosMsg(path);
+  return dslPathToRosMsg(path, isSplined);
 }
 
-nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path)
+nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path, bool isSplined)
 {
   //ROS_INFO("nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path)");
   //using namespace std::chrono;
@@ -590,9 +590,16 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
   msg.poses.resize(dsl_path.size());
   for(int i = 0; i < dsl_path.size(); i++)
   {
-    msg.poses[i].pose.position.x = dsl_path[i][0] + pmin(0) + res_octomap / 2 - 0.25;
-    msg.poses[i].pose.position.y = dsl_path[i][1] + pmin(1) + res_octomap / 2 - 0.25;
-    msg.poses[i].pose.position.z = dsl_path[i][2] + pmin(2) + res_octomap / 2 - 0.25;
+    if(isSplined){
+        msg.poses[i].pose.position.x = dsl_path[i][0] * res_octomap + pmin(0);
+        msg.poses[i].pose.position.y = dsl_path[i][1] * res_octomap + pmin(1);
+        msg.poses[i].pose.position.z = dsl_path[i][2] * res_octomap + pmin(2);
+    }
+    else{
+        msg.poses[i].pose.position.x = dsl_path[i][0] + pmin(0);
+        msg.poses[i].pose.position.y = dsl_path[i][1] + pmin(1);
+        msg.poses[i].pose.position.z = dsl_path[i][2] + pmin(2);
+    }
   }
 
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -631,9 +638,9 @@ void DslGrid3D::publishOccupancyGrid()
         //}
 
         //std::cout<<"check 01: "<<gdsl_->GetCost(pos)<<std::endl;
-        if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
+        //if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
         //if(gdsl_->GetCost(pos) == DSL_UNKNOWN)
-        //if(gdsl_->GetCost(pos) == 1)
+        if(gdsl_->GetCost(pos) == 1)
         //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
         //if(gdsl_->GetCost(pos) < DSL_OCCUPIED and gdsl_->GetCost(pos) > DSL_UNKNOWN)
         {

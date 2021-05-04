@@ -55,8 +55,8 @@ private:
   void publishOccupancyGrid();
 
   void planAllPaths();
-  nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path);
-  nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
+  nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path, bool isSplined);
+  nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path, bool isSplined);
   bool isPosInBounds(const Eigen::Vector3d& pos);
 
   std::shared_ptr<dsl::Grid3d> grid_;

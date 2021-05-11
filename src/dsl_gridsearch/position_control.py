@@ -78,13 +78,13 @@ class Server:
             self.z_r = self.path.poses[self.wp_index].pose.position.z
 
 
-#        self.vel_msg.vector.x = self.x_r
-#        self.vel_msg.vector.y = self.y_r
-#        self.vel_msg.vector.z = self.z_r
+        self.vel_msg.position.x = self.x_r
+        self.vel_msg.position.y = self.y_r
+        self.vel_msg.position.z = self.z_r
 
-        self.vel_msg.position.x = self.x_r + self.x_pf
-        self.vel_msg.position.y = self.y_r + self.y_pf
-        self.vel_msg.position.z = self.z_r + self.z_pf
+#        self.vel_msg.position.x = self.x_r + self.x_pf
+#        self.vel_msg.position.y = self.y_r + self.y_pf
+#        self.vel_msg.position.z = self.z_r + self.z_pf
         self.vel_msg.orientation.x = q_x
         self.vel_msg.orientation.y = q_y
         self.vel_msg.orientation.z = q_z
@@ -93,6 +93,7 @@ class Server:
         print("operatin")
         self.vel_publisher.publish(self.vel_msg)
         return
+
 if __name__ == "__main__":
     try:
         rospy.init_node('position_control', anonymous=True)

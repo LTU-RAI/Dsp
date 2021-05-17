@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!-- 
+  Example launch file for octomap_server mapping: 
+  Listens to incoming PointCloud2 data and incrementally builds an octomap. 
+  The data is sent out in different representations. 
+
+  Copy this file into your workspace and adjust as needed, see
+  www.ros.org/wiki/octomap_server for details  
+-->
+<launch>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		<param name="resolution" value="0.5" />
+		
+		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+		<param name="frame_id" type="string" value="/map" />
+
+		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="10.0" />
+
+                <param name="publish_free_space" value="true"/>
+		
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="cloud_in" to="/scan_matched_points2" />
+
+		<!--param name="pointcloud_[min|max]_z" value="20.0" /-->
+
+		<!--param name="occupancy_[min|max]_z" value="20.0" /-->
+
+	</node>
+                <!--node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 /world /odom 10" /-->
+</launch>
+
+        <!--param name="occupancy_min_z" value="-0.5" /-->
+        <!--param name="occupancy_max_z" value="1.5" /-->
+		<!--param name="publish_free_space" value="true" /-->

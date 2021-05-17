@@ -40,6 +40,7 @@ private:
   void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
   void handleSetFrontier(const exploration::FrontierConstPtr& msg);
   void setGoal(Eigen::Vector3d wpos);
+  void setAndPublishPath();
   Eigen::Vector3d posRes(Eigen::Vector3d wpos);
 
   void handleSetOccupied(const geometry_msgs::PointConstPtr& msg);
@@ -54,8 +55,8 @@ private:
   void publishOccupancyGrid();
 
   void planAllPaths();
-  nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path);
-  nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path);
+  nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path, bool isSplined);
+  nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path, bool isSplined);
   bool isPosInBounds(const Eigen::Vector3d& pos);
 
   std::shared_ptr<dsl::Grid3d> grid_;
@@ -105,7 +106,7 @@ private:
   Eigen::Vector3d first_pos;
   Eigen::Vector3d start_pos;
   Eigen::Vector3d goal_pos;
-  bool start_set = false;
+  bool grid_built = false;
   bool goal_set = false;
   double length = -1.0;
   double width = -1.0;

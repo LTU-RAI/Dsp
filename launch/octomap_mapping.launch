@@ -13,7 +13,6 @@
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
 		<param name="frame_id" type="string" value="/map" />
-
 		
 		<!-- maximum range to integrate (speedup!) -->
 		<param name="sensor_model/max_range" value="5.0" />

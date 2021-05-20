@@ -160,8 +160,7 @@ void DslGrid3D::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& m
     return;
 }
 
-void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
-{	
+void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
   //ROS_INFO("DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)");        
   //using namespace std::chrono;
   //high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -169,9 +168,9 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg)
 
     // This can be cast to other types. An octree seems to be appropriate for publishing
     std::shared_ptr<octomap::OcTree> tree(dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg)));
-/*	std::cout << "resolution: " << tree->getResolution() << std::endl;
-	std::cout << "type: " << tree->getTreeType() << std::endl;
-	std::cout << "size: " << tree->size() << std::endl;
+/*      std::cout << "resolution: " << tree->getResolution() << std::endl;
+    std::cout << "type: " << tree->getTreeType() << std::endl;
+    std::cout << "size: " << tree->size() << std::endl;
 */
     res_octomap = tree->getResolution();
     double length_test, width_test, height_test;
@@ -251,24 +250,24 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
     //std::cout << "count: " << std::endl;
 
     //Bound occupancy_map from top and bottom
-/*	for(int x = 0; x < ogrid_->getLength(); x++)
-	{  
+/*      for(int x = 0; x < ogrid_->getLength(); x++)
+    {  
         for(int y = 0; y < width_metric; y++)  
-		{
-			//for(int z = 0; z < height_metric; z++)  
-			//{
-				Eigen::Vector3i gpMin(x, y, zmin);
+        {
+            //for(int z = 0; z < height_metric; z++)  
+            //{
+                Eigen::Vector3i gpMin(x, y, zmin);
                 Eigen::Vector3d wpMin = ogrid_->gridToPosition(gpMin);
-				ogrid_->setOccupied(wpMin, true);
+                ogrid_->setOccupied(wpMin, true);
 
-				Eigen::Vector3i gpMax(x, y, height_metric-1);
+                Eigen::Vector3i gpMax(x, y, height_metric-1);
                 Eigen::Vector3d wpMax = ogrid_->gridToPosition(gpMax);
-				ogrid_->setOccupied(wpMax, true);
-			//}
+                ogrid_->setOccupied(wpMax, true);
+            //}
         }
-	}
+    }
 */
-//	std::cout << "Grid Bounds: " << pmin.transpose() << " and " 
+//      std::cout << "Grid Bounds: " << pmin.transpose() << " and " 
 //    << pmax.transpose() << std:: endl;
 
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -598,7 +597,7 @@ void DslGrid3D::planAllPaths()
 
     gdsl_->Plan(path_);
     gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
-    if (path_.cells.size() > 5){
+    if (path_.cells.size() > 7){
         gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
         gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
     } else {

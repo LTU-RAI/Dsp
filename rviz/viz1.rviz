@@ -6,10 +6,13 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /MarkerArray1
         - /Path1/Offset1
+        - /Marker2
+        - /MarkerArray3
         - /Path2
       Splitter Ratio: 0.5
-    Tree Height: 1113
+    Tree Height: 794
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -28,7 +31,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -59,7 +62,7 @@ Visualization Manager:
       Marker Topic: /occupied_cells_vis_array
       Name: MarkerArray
       Namespaces:
-        {}
+        map: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -90,19 +93,69 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        camera_link1:
-          Value: false
-        camera_link2:
-          Value: false
-        pixy/base_link:
+        back:
           Value: true
-        pixy/sonar_link:
-          Value: false
-        pixy/velodyne:
-          Value: false
-        pixy/velodyne_base_link:
-          Value: false
-        world:
+        back_fisheye:
+          Value: true
+        base_link:
+          Value: true
+        body:
+          Value: true
+        flat_body:
+          Value: true
+        front_left_hip:
+          Value: true
+        front_left_lower_leg:
+          Value: true
+        front_left_upper_leg:
+          Value: true
+        front_rail:
+          Value: true
+        front_right_hip:
+          Value: true
+        front_right_lower_leg:
+          Value: true
+        front_right_upper_leg:
+          Value: true
+        frontleft:
+          Value: true
+        frontleft_fisheye:
+          Value: true
+        frontright:
+          Value: true
+        frontright_fisheye:
+          Value: true
+        gpe:
+          Value: true
+        head:
+          Value: true
+        left:
+          Value: true
+        left_fisheye:
+          Value: true
+        odom:
+          Value: true
+        rear_left_hip:
+          Value: true
+        rear_left_lower_leg:
+          Value: true
+        rear_left_upper_leg:
+          Value: true
+        rear_rail:
+          Value: true
+        rear_right_hip:
+          Value: true
+        rear_right_lower_leg:
+          Value: true
+        rear_right_upper_leg:
+          Value: true
+        right:
+          Value: true
+        right_fisheye:
+          Value: true
+        velodyne:
+          Value: true
+        vision:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -110,17 +163,53 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          pixy/base_link:
-            camera_link1:
+        odom:
+          body:
+            base_link:
               {}
-            camera_link2:
+            flat_body:
               {}
-            pixy/sonar_link:
-              {}
-            pixy/velodyne_base_link:
-              pixy/velodyne:
+            front_left_hip:
+              front_left_upper_leg:
+                front_left_lower_leg:
+                  {}
+            front_rail:
+              velodyne:
                 {}
+            front_right_hip:
+              front_right_upper_leg:
+                front_right_lower_leg:
+                  {}
+            head:
+              back:
+                back_fisheye:
+                  {}
+              frontleft:
+                frontleft_fisheye:
+                  {}
+              frontright:
+                frontright_fisheye:
+                  {}
+              left:
+                left_fisheye:
+                  {}
+              right:
+                right_fisheye:
+                  {}
+            rear_left_hip:
+              rear_left_upper_leg:
+                rear_left_lower_leg:
+                  {}
+            rear_rail:
+              {}
+            rear_right_hip:
+              rear_right_upper_leg:
+                rear_right_lower_leg:
+                  {}
+            vision:
+              {}
+          gpe:
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -136,7 +225,7 @@ Visualization Manager:
       Marker Topic: /vis_next/visualization_marker
       Name: Marker
       Namespaces:
-        {}
+        my_namespace: true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -178,11 +267,41 @@ Visualization Manager:
       Topic: /dsl_grid3d/path
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /octomap_point_cloud_centers
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: world
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -206,33 +325,33 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 22.239675521850586
+      Distance: 17.6898136138916
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -6.779625415802002
-        Y: -3.108917236328125
-        Z: 6.020315647125244
+        X: -0.7813743948936462
+        Y: -1.6415503025054932
+        Z: 0.5039744973182678
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7847970724105835
+      Pitch: 1.1747967004776
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.7447891235351562
+      Yaw: 2.061607837677002
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1410
+  Height: 1091
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000004e4fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000004e4000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b0fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000002b0000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004e70000003efc0100000002fb0000000800540069006d00650100000000000004e7000002eb00fffffffb0000000800540069006d006501000000000000045000000000000000000000038b000004e400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000156000003a5fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000003a5000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b0fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000002b0000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000076c0000003efc0100000002fb0000000800540069006d006501000000000000076c0000026c00fffffffb0000000800540069006d0065010000000000000450000000000000000000000610000003a500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -241,6 +360,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1255
-  X: 51
-  Y: 0
+  Width: 1900
+  X: 0
+  Y: 31

@@ -5,6 +5,7 @@
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <exploration/Frontier.h>
 
 #include "dsl/gridsearch.h"
@@ -32,6 +33,7 @@ public:
 private:
   void updateGDSL(std::shared_ptr<octomap::OcTree> tree);
   void buildGDSL(std::shared_ptr<octomap::OcTree> tree);
+  void buildGraph();
   void saftyMarginal(Eigen::Vector3d pos, bool update);
 
   void handleSetStart(const geometry_msgs::PointConstPtr& msg);
@@ -47,6 +49,7 @@ private:
   void handleSetUnoccupied(const geometry_msgs::PointConstPtr& msg);
   void spin(const ros::TimerEvent& e);
   void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
+  void occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg);
 
   void handleSetOccupied(Eigen::Vector3d wpos);
   void handleSetUnoccupied(Eigen::Vector3d wpos);
@@ -90,6 +93,8 @@ private:
   double cells_per_meter_;
   double spline_step_;
   bool use_gazebo_odom_;
+  bool use_3d_;
+  std::string map_topic_;
   std::string odom_topic_;
   std::string odom_frame_id_;
   int DSL_UNKNOWN;
@@ -99,6 +104,9 @@ private:
   int length_metric;
   int width_metric;
   int height_metric;
+  int risk_;
+  int lower_thresh_;
+  int upper_thresh_;
   double res_octomap;
   std::shared_ptr<double[]> occupancy_map;
   

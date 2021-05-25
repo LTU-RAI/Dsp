@@ -523,14 +523,16 @@ void DslGrid3D::planAllPaths()
 
     gdsl_->Plan(path_);
     gdsl_->SplinePath(path_, splinepath_, /*splinecells_,*/ spline_step_);
-    if (path_.cells.size() > 7){
-        gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
-        gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
-    } else {
-        std::cout<<"catch"<<std::endl;
-        optpath_ = path_;
-        splineoptpath_ = splinepath_;
-    }
+    
+    //if (path_.cells.size() > 7){
+    //    gdsl_->OptPath(path_, optpath_, 1e-3, 1./(10*cells_per_meter_));
+    //    gdsl_->SplinePath(optpath_, splineoptpath_, /*splineoptcells_,*/ spline_step_);
+    //} else {
+    //    std::cout<<"catch"<<std::endl;
+    //    optpath_ = path_;
+   //     splineoptpath_ = splinepath_;
+    //}
+    
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
   //duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 /*  std::cout << "----LOG: planAllPaths. It took me " << time_span.count() << " seconds.";
@@ -550,9 +552,9 @@ void DslGrid3D::publishAllPaths()
   //high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
   path_pub_.publish(dslPathToRosMsg(path_, false));
-  optpath_pub_.publish(dslPathToRosMsg(optpath_, false)); 
+  //optpath_pub_.publish(dslPathToRosMsg(optpath_, false)); 
   splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
-  splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_, true)); 
+  //splineoptpath_pub_.publish(dslPathToRosMsg(splineoptpath_, true)); 
 
   //high_resolution_clock::time_point t2 = high_resolution_clock::now();
   //duration<double> time_span = duration_cast<duration<double>>(t2 - t1);

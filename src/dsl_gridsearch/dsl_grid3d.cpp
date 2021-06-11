@@ -340,6 +340,9 @@ void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 
 void DslGrid3D::setGoal(Eigen::Vector3d wpos)
 {
+    if(!use_3d_){
+        wpos[2] = 0;
+    }
     goal_pos = wpos; 
     setAndPublishPath();
 }

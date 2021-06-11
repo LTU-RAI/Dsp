@@ -11,7 +11,7 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     ROS_INFO("DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private)");        
 
     if (!nh_private_.getParam ("map_topic", map_topic_))
-        map_topic_ = "/octomap_full";
+        map_topic_ = "octomap_full";
     if (!nh_private_.getParam ("spline_step_", spline_step_))
         spline_step_ = .1;
     if (!nh_private_.getParam ("lower_thresh", lower_thresh_))
@@ -26,15 +26,15 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     if (!nh_private_.getParam ("use_3d", use_3d_))
         use_3d_ = true;
     if (!nh_private_.getParam ("odom_topic", odom_topic_))
-        odom_topic_ = "/pixy/truth/NWU";
+        odom_topic_ = "pixy/truth/NWU";
     if (!nh_private_.getParam ("odom_frame_id", odom_frame_id_))
         odom_frame_id_ = "odom";
     if (!nh_private_.getParam ("unknown_value", DSL_UNKNOWN))
         DSL_UNKNOWN = 10000;
 
-    occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "/dsl_grid3d/occupancy_map",  0);
-    path_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/path",  0);
-    splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "/dsl_grid3d/splinepath",  0);
+    occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsl_grid3d/occupancy_map",  0);
+    path_pub_ = nh_.advertise<nav_msgs::Path>( "dsl_grid3d/path",  0);
+    splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "dsl_grid3d/splinepath",  0);
 
     if(use_gazebo_odom_)
     {
@@ -45,7 +45,7 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     else
     {
         ROS_INFO("Manualy set start");
-        set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_start", 1, 
+        set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("dsl_grid3d/set_start", 1, 
           &DslGrid3D::handleSetStart, this);
     }
 
@@ -59,9 +59,9 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         height_metric = 1;
     }
 
-    set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("/dsl_grid3d/set_goal", 1,
+    set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("dsl_grid3d/set_goal", 1,
         &DslGrid3D::handleSetGoal, this);
-    set_frontier_sub = nh_.subscribe<exploration::Frontier>("/next_frontier", 1,
+    set_frontier_sub = nh_.subscribe<exploration::Frontier>("next_frontier", 1,
         &DslGrid3D::handleSetFrontier, this);
 
 

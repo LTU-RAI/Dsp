@@ -105,15 +105,17 @@ void DslGrid3D::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& m
         int size = length_metric * width_metric;
         occupancy_map.reset(new double[size]);
 
-
         for(int i = 0; i < size; i++){
             occupancy_map[i] = DSL_UNKNOWN; 
+        }
+
+        for(int i = 0; i < size; i++){
             if(msg->data[i] > upper_thresh_){
                 Eigen::Vector3d pos(i % length_metric, i / length_metric, 0);
                 saftyMarginal(pos, false);
                 occupancy_map[i] = DSL_OCCUPIED;
             }
-            else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1){
+            else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1 && occupancy_map[i] >= DSL_UNKNOWN){
                 occupancy_map[i] = occupancy_map[i] - DSL_UNKNOWN + 1;
             }
                 
@@ -271,6 +273,7 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 // adding of safty margianl to occupied space inprove safty
 void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
 {
+    Eigen::Vector3d local_pose;
     for(int i = -risk_; i <= risk_; i++){
         for(int j = -risk_; j <= risk_; j++){
             for(int k = -risk_; k <= risk_; k++){
@@ -279,6 +282,7 @@ void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
                 int z = pos(2) + k;
                 if(x >= 0 && x < length_metric && y >= 0 && y < width_metric && z >= 0 && z < height_metric){
 	            int idx = x + y*length_metric + z*length_metric*width_metric;
+                    local_pose << pos(0) + i, pos(1) + j, pos(2) + k;
                     int sum = i * i + j * j + k * k;
                     if (!sum){ // sum = 0 > current ocupied space
                         continue;
@@ -287,14 +291,14 @@ void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
                     if(occupancy_map[idx] < cost){
                         occupancy_map[idx] = cost;
                         if(update){
-                            gdsl_->SetCost(pos, cost);
+                            gdsl_->SetCost(local_pose, cost);
                         }
                     }
-                    else if (DSL_UNKNOWN == occupancy_map[idx] or (occupancy_map[idx] > DSL_UNKNOWN and occupancy_map[idx] < DSL_OCCUPIED)){
+                    else if (DSL_UNKNOWN == occupancy_map[idx] or (occupancy_map[idx] >= DSL_UNKNOWN and occupancy_map[idx] < DSL_UNKNOWN + cost)){
                         cost += DSL_UNKNOWN;
                         occupancy_map[idx] = cost;
                         if(update){
-                            gdsl_->SetCost(pos, cost);
+                            gdsl_->SetCost(local_pose, cost);
                         }
                     }
                 }
@@ -455,9 +459,9 @@ void DslGrid3D::publishOccupancyGrid()
                 //if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) == 1)
-                //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
+                if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSL_OCCUPIED and gdsl_->GetCost(pos) > DSL_UNKNOWN)
-                if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_OCCUPIED)
+                //if(gdsl_->GetCost(pos) >= DSL_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
                 {
                     geometry_msgs::Point pt;
                     pt.x = (x + pmin(0)) * res_octomap;

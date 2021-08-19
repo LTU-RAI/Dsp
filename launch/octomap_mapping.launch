@@ -12,7 +12,7 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/map" />
+		<param name="frame_id" type="string" value="/world" />
 		
 		<!-- maximum range to integrate (speedup!) -->
 		<param name="sensor_model/max_range" value="5.0" />
@@ -28,7 +28,8 @@
 		<!--param name="occupancy_[min|max]_z" value="20.0" /-->
 
 	</node>
-                <node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 /map /velodyne 10" />
+                <!--node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 /map /velodyne 10" /-->
+                <!--node pkg="tf" type="static_transform_publisher" name="fake_loc2" args="0 0 0 0 0 0 /world /velodyne 10" /-->
 </launch>
 
         <!--param name="occupancy_min_z" value="-0.5" /-->

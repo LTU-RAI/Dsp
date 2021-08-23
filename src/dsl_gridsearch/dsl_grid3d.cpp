@@ -441,14 +441,14 @@ Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
 void DslGrid3D::planAllPaths()
 {
     gdsl_->Plan(path_);
-    gdsl_->SplinePath(path_, splinepath_, spline_step_);
+    //gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
 void DslGrid3D::publishAllPaths()
 {
   path_pub_.publish(dslPathToRosMsg(path_, false));
-  splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
+  //splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
 }
 
 // transfom paht to ros paht

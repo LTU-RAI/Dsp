@@ -153,7 +153,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) 
         buildGDSL(tree);
         grid_built = true;
     }
-    publishOccupancyGrid();
+    //publishOccupancyGrid();
     //setAndPublishPath();
 }
 
@@ -493,32 +493,48 @@ void DslGrid3D::publishOccupancyGrid()
     std::vector<geometry_msgs::Point> marker_pos;
     std::vector<geometry_msgs::Point> risk_pos;
      
+    std::cout<<"preLoop"<<std::endl;
     for(double x = 0; x < length_metric; x++)
     {
+
+    std::cout<<"x"<<std::endl;
         for(double y = 0; y < width_metric; y++)
         {
+    std::cout<<"y"<<std::endl;
             for(double z = 0; z < height_metric; z++)
             {
+    std::cout<<x<<std::endl;
+    std::cout<<y<<std::endl;
+    std::cout<<z<<std::endl;
                 Eigen::Vector3d pos(x, y, z);
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-                //if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
+    std::cout<<"get1"<<std::endl;
+                if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) == 1)
-                if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
+                //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSL_OCCUPIED and gdsl_->GetCost(pos) > DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) >= DSL_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
                 {
+    std::cout<<"get2"<<std::endl;
                     geometry_msgs::Point pt;
-                    pt.x = (x + pmin(0)) * res_octomap;
-                    pt.y = (y + pmin(1)) * res_octomap;
-                    pt.z = (z + pmin(2)) * res_octomap;
+                    //pt.x = (x + pmin(0)) * res_octomap;
+                    //pt.y = (y + pmin(1)) * res_octomap;
+                    //pt.z = (z + pmin(2)) * res_octomap;
+                    pt.x = (x * res_octomap) + pmin(0);
+                    pt.y = (y * res_octomap) + pmin(1);
+                    pt.z = (z * res_octomap) + pmin(2);
+    std::cout<<pt<<std::endl;
                     marker_pos.push_back(pt);
+    std::cout<<"endLoopIter"<<std::endl;
                 }  
+    std::cout<<"not"<<std::endl;
             }  
         }
     }
+    std::cout<<"preMsg"<<std::endl;
 
     occmap_viz.header.frame_id = odom_frame_id_; ///world /pixy/velodyne
     occmap_viz.header.stamp = ros::Time();
@@ -526,9 +542,9 @@ void DslGrid3D::publishOccupancyGrid()
     occmap_viz.id = 1;
     occmap_viz.type = visualization_msgs::Marker::CUBE_LIST;
     occmap_viz.action = visualization_msgs::Marker::ADD;
-    occmap_viz.pose.position.x = 0.5 * res_octomap + pmin(0) * res_octomap; 
-    occmap_viz.pose.position.y = 0.5 * res_octomap + pmin(1) * res_octomap;
-    occmap_viz.pose.position.z = 0.5 * res_octomap + pmin(2) * res_octomap;
+    occmap_viz.pose.position.x = 0.5 * res_octomap;// + pmin(0) * res_octomap; 
+    occmap_viz.pose.position.y = 0.5 * res_octomap;// + pmin(1) * res_octomap;
+    occmap_viz.pose.position.z = 0.5 * res_octomap;// + pmin(2) * res_octomap;
     occmap_viz.pose.orientation.x = 0.0;
     occmap_viz.pose.orientation.y = 0.0;
     occmap_viz.pose.orientation.z = 0.0;
@@ -542,6 +558,7 @@ void DslGrid3D::publishOccupancyGrid()
     occmap_viz.color.b = 0.0;
     occmap_viz.points = marker_pos;
     occ_map_viz_pub_.publish(occmap_viz);
+    std::cout<<"done pub"<<std::endl;
 
 }
 

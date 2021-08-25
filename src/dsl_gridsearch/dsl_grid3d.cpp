@@ -153,7 +153,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) 
         buildGDSL(tree);
         grid_built = true;
     }
-    //publishOccupancyGrid();
+    publishOccupancyGrid();
     //setAndPublishPath();
 }
 
@@ -178,21 +178,27 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
         Eigen::Vector3d pos(it.getX(), it.getY(), it.getZ());
         pos = posRes(pos);
         int n = it.getSize() / res_octomap;
+        
+        if (n != 1){
+            for (int i = 0; i < 3; i++){
+                pos(i) = pos(i) + 0.5;
+            }
+        }
         int i = -n/2;
-	it->getOccupancy();
+	//it->getOccupancy();
         // octomap may have lage nodes. loops will add voxels for entire large node
         do{
             int j = -n/2;
             do{
                 int k = -n/2;
                 do{
-	            int idx = ((int) pos(0) + i) + ((int) pos(1) + j) *length_metric + ((int) pos(2) + k) *length_metric*width_metric;
+	            int idx = ((int) pos(0) + i) + (((int) pos(1) + j) * length_metric) + (((int) pos(2) + k) * length_metric * width_metric);
 	            if(tree->isNodeOccupied(*it)) {
                         Eigen::Vector3d p(pos(0) + i, pos(1) + j, pos(2) + k);
                         saftyMarginal(p, false);
 		        occupancy_map[idx] = DSL_OCCUPIED;
 	            }
-                    else if (occupancy_map[idx] >= DSL_UNKNOWN){
+                    else {//if (occupancy_map[idx] >= DSL_UNKNOWN){
                         occupancy_map[idx] = occupancy_map[idx] - DSL_UNKNOWN + 1;
                     }
                     k++;
@@ -244,8 +250,13 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 
             
         int n = it.getSize() / res_octomap;
+        if (n != 1){
+            for (int i = 0; i < 3; i++){
+                pos(i) = pos(i) + 0.5;
+            }
+        }
         int i = -n/2;
-	it->getOccupancy();
+	//it->getOccupancy();
         // octomap may have lage nodes. loops will add voxels for entire large node
         do{
             int j = -n/2;
@@ -257,9 +268,9 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 
                     if(tree->isNodeOccupied(*it) and occupancy_map[idx] != DSL_OCCUPIED)
                     {
-                        saftyMarginal(p, true);
                         gdsl_->SetCost(p, DSL_OCCUPIED);
                         occupancy_map[idx] = DSL_OCCUPIED;
+                        saftyMarginal(p, true);
                     }			
                     else if(!tree->isNodeOccupied(*it)  and occupancy_map[idx] >= DSL_UNKNOWN)
                     {
@@ -441,14 +452,14 @@ Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
 void DslGrid3D::planAllPaths()
 {
     gdsl_->Plan(path_);
-    gdsl_->SplinePath(path_, splinepath_, spline_step_);
+    //gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
 void DslGrid3D::publishAllPaths()
 {
   path_pub_.publish(dslPathToRosMsg(path_, false));
-  splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
+  //splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
 }
 
 // transfom paht to ros paht
@@ -493,32 +504,24 @@ void DslGrid3D::publishOccupancyGrid()
     std::vector<geometry_msgs::Point> marker_pos;
     std::vector<geometry_msgs::Point> risk_pos;
      
-    std::cout<<"preLoop"<<std::endl;
     for(double x = 0; x < length_metric; x++)
     {
 
-    std::cout<<"x"<<std::endl;
         for(double y = 0; y < width_metric; y++)
         {
-    std::cout<<"y"<<std::endl;
             for(double z = 0; z < height_metric; z++)
             {
-    std::cout<<x<<std::endl;
-    std::cout<<y<<std::endl;
-    std::cout<<z<<std::endl;
                 Eigen::Vector3d pos(x, y, z);
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-    std::cout<<"get1"<<std::endl;
-                if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
+                //if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSL_UNKNOWN)
-                //if(gdsl_->GetCost(pos) == 1)
+                if(gdsl_->GetCost(pos) == 1)
                 //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSL_OCCUPIED and gdsl_->GetCost(pos) > DSL_UNKNOWN)
                 //if(gdsl_->GetCost(pos) >= DSL_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
                 {
-    std::cout<<"get2"<<std::endl;
                     geometry_msgs::Point pt;
                     //pt.x = (x + pmin(0)) * res_octomap;
                     //pt.y = (y + pmin(1)) * res_octomap;
@@ -526,15 +529,11 @@ void DslGrid3D::publishOccupancyGrid()
                     pt.x = (x * res_octomap) + pmin(0);
                     pt.y = (y * res_octomap) + pmin(1);
                     pt.z = (z * res_octomap) + pmin(2);
-    std::cout<<pt<<std::endl;
                     marker_pos.push_back(pt);
-    std::cout<<"endLoopIter"<<std::endl;
                 }  
-    std::cout<<"not"<<std::endl;
             }  
         }
     }
-    std::cout<<"preMsg"<<std::endl;
 
     occmap_viz.header.frame_id = odom_frame_id_; ///world /pixy/velodyne
     occmap_viz.header.stamp = ros::Time();
@@ -558,7 +557,6 @@ void DslGrid3D::publishOccupancyGrid()
     occmap_viz.color.b = 0.0;
     occmap_viz.points = marker_pos;
     occ_map_viz_pub_.publish(occmap_viz);
-    std::cout<<"done pub"<<std::endl;
 
 }
 

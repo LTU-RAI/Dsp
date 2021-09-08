@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find dsl_gridsearch)/launch/octomap_gazebo.launch"/>
+    <include file="$(find dsl_gridsearch)/launch/dsl_grid3d_gazebo.launch"/>
+    <node name="path_to_pose" pkg="dsl_gridsearch" type="path_to_pose.py" output="screen" />
+</launch>

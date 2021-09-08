@@ -90,9 +90,8 @@ class Server:
 
 if __name__ == "__main__":
     try:
-        rospy.init_node('position_control', anonymous=True)
+        rospy.init_node('path_to_pose', anonymous=True)
         rospy.loginfo("Starting...")
-        rospy.Rate(5)	#10Hz
 
         server = Server()
 

@@ -131,6 +131,7 @@ target_link_libraries(dsl_gridsearch
 
 ## Declare a cpp executable
 add_executable(dsl_grid3d_node src/${PROJECT_NAME}/dsl_grid3d_node.cpp)
+#add_executable(path_to_pose src/${PROJECT_NAME}/path_to_pose.py)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

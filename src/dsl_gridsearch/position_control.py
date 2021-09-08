@@ -5,10 +5,10 @@ import rospy, time
 from nav_msgs.msg import Path
 from math import pi, sin, cos, atan2, sqrt
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Vector3Stamped, Pose, PointStamped
+from geometry_msgs.msg import Vector3Stamped, Pose, PointStamped, PoseStamped
 import math
 
-WP_SIZE = 0.5
+WP_SIZE = 1.0
 
 class Server:
     def __init__(self, current_time=None):
@@ -18,10 +18,10 @@ class Server:
         self.last_time = self.current_time
 
 #        self.vel_publisher = rospy.Publisher('/pixy/reference', Vector3Stamped, queue_size = 10)
-        self.vel_publisher = rospy.Publisher('/pixy/reference', Pose, queue_size = 10)
+        self.vel_publisher = rospy.Publisher('/shafter3d/position_ref', PoseStamped, queue_size = 10)
 
 #        self.vel_msg = Vector3Stamped()
-        self.vel_msg = Pose()
+        self.vel_msg = PoseStamped()
 
 #        self.waypoint_subscriber = rospy.Subscriber('/dsl_grid3d/optpath', Path, self.waypoint_callback)
         self.waypoint_subscriber = rospy.Subscriber('/dsl_grid3d/path', Path, self.waypoint_callback)
@@ -46,7 +46,7 @@ class Server:
 
     def read_callback(self, msg):
         self.position_messages = msg
-        #print("my postition")
+        print("my postition")
         #print(msg)
         if(self.waypoint):
             self.control()
@@ -78,17 +78,23 @@ class Server:
             self.z_r = self.path.poses[self.wp_index].pose.position.z
 
 
-        self.vel_msg.position.x = self.x_r
-        self.vel_msg.position.y = self.y_r
-        self.vel_msg.position.z = self.z_r
+        self.vel_msg.pose.position.x = self.x_r
+        self.vel_msg.pose.position.y = self.y_r
+        if self.z_r < 1.0:
+            self.vel_msg.pose.position.z = 1.0 #self.z_r
+        elif self.z_r > 2.0:
+            self.vel_msg.pose.position.z = 2.0 #self.z_r
+        else:
+            self.vel_msg.pose.position.z = self.z_r
+
 
 #        self.vel_msg.position.x = self.x_r + self.x_pf
 #        self.vel_msg.position.y = self.y_r + self.y_pf
 #        self.vel_msg.position.z = self.z_r + self.z_pf
-        self.vel_msg.orientation.x = q_x
-        self.vel_msg.orientation.y = q_y
-        self.vel_msg.orientation.z = q_z
-        self.vel_msg.orientation.w = q_w
+        self.vel_msg.pose.orientation.x = q_x
+        self.vel_msg.pose.orientation.y = q_y
+        self.vel_msg.pose.orientation.z = 0.0
+        self.vel_msg.pose.orientation.w = q_w
 
         print("operatin")
         self.vel_publisher.publish(self.vel_msg)
@@ -103,7 +109,7 @@ if __name__ == "__main__":
         server = Server()
 
         while not rospy.is_shutdown():
-            rospy.Subscriber("/pixy/truth/NWU", Odometry, server.read_callback)
+            rospy.Subscriber("/odometry/imu", Odometry, server.read_callback)
             rospy.spin()
 
         rospy.loginfo("Reading finished...")

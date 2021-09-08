@@ -28,95 +28,45 @@ If you get linker errors related to trimesh, e.g.
 
 then build trimesh2 (https://github.com/Forceflow/trimesh2.git) from source and copy the bin and include directory to extern/trimesh (See https://github.com/jhu-asco/dsl_gridsearch/issues/3)
 
-# DSL Grid3D
-
 ## Quickstart / Minimal Setup
+To use DSL with octomap in gazebo set `frame_id` and `cloud_in` to the map frame used and point-cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsl_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsl_gridsearch/path_to_pose.py`.
+The run:
+```
+rosrun dsl_gridsearch dsl_3d_start.launch
+```
+and publich the gole pose to `/dsl_grid3d/set_goal`.
+Observe that the pose has to be inside the map.
 
-Unarchive the mesh file:
-
-		cd data 
-		tar -zxvf hackerman2.tar.gz
-
-Launch the rviz viewer:
-
-		roslaunch dsl_gridsearch rviz.launch
-
-Launch the dsl_grid3d main ros node and load a mesh:
-
-		roslaunch dsl_gridsearch dsl_grid3d_campus.launch
 
 ## Topics
 ### Subscribed
 * `/dsl_grid3d/set_start`: [geometry_msgs::Point] Used to set the start position.
 * `/dsl_grid3d/set_start`: [geometry_msgs::Point] Used to set the goal position.
-* `/dsl_grid3d/set_occupied`: [geometry_msgs::Point] Used to set a position as occupied.
-* `/dsl_grid3d/set_unoccupied`: [geometry_msgs::Point] Used to set a position as unoccupied.
-* `/dsl_grid3d/set_mesh_occupied`: [shape_msgs::Mesh] Used to set cells intersecting with a mesh as occupied.
+* `/octomap_full`: [octomap_msgs::Octomap] Use for 3D map.
+* `/map`: [nav_msgs::OccupancyGrid] Used for 2D map.
 
 ### Published 
-* `/dsl_grid3d/occupancy_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz.
-* `/dsl_grid3d/mesh`: [visualization_msgs::Marker] A marker for the mesh to be displayed in Rviz.
+* `/dsl_grid3d/occupancy_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz used for debugging. Can display different occupancy statuses of voxels in the map by changing the publisher in `dsl_grid3d.cpp`.
 * `/dsl_grid3d/path`: [nav_msgs::Path] The generated path from start to goal.
-* `/dsl_grid3d/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoints.
-* `/dsl_grid3d/splinepath`: [nav_msgs::Path] A spline interpolation of the waypoints from the original path.
-* `/dsl_grid3d/splineoptpath`: [nav_msgs::Path] A spline interpolation of the waypoints from the optimized path.
+* `/dsl_grid3d/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoint
 
 
 ## Parameters
 The user must specify either a mesh to load or the size of the occupancy grid.  If both are given, the mesh will be loaded into an occupancy grid of the size given.
 
-* `mesh_filename`: [string] Absolute filepath of a .stl mesh to be loaded into an occupancy grid at runtime.
-* `cells_per_meter`: [double] The resolution of the occupancy grid in cells/meter.
-* `spline_path_maxvelocity`: [double] Determines the time scaling of the spline interpolated paths.
-* `use_textured_mesh`: [bool] Indicates whether a .dae mesh file is availble to be used for visualization.  If mesh_filename is not the empty string, the program will look for a file with the same name with a .dae extension.  This file will be visualized in Rviz.  If set to false, the .stl file will be visualized. 
-* `grid_length`: [int] Length of the grid. If less than or equal to 0, the grid will be the same size as the bounding box of the loaded mesh.
-* `grid_width`: [int] Width of the grid. If less than or equal to 0, the grid will be the same size as the bounding box of the loaded mesh.
-* `grid_height`: [int] Height of the grid. If less than or equal to 0, the grid will be the same size as the bounding box of the loaded mesh.
-* `grid_xmin`: [int] The world frame x value corresponding to the first cell of the grid.
-* `grid_ymin`: [int] The world frame y value corresponding to the first cell of the grid.
-* `grid_zmin`: [int] The world frame z value corresponding to the first cell of the grid.
-
-# DSL Grid2D
-
-## Quickstart / Minimal Setup
-
-Unarchive the mesh file:
-
-		cd data 
-		tar -zxvf hackerman2.tar.gz
-
-Launch the rviz viewer:
-
-		roslaunch dsl_gridsearch rviz2d.launch
-
-Launch the dsl_grid2d main ros node and load a mesh:
-
-		roslaunch dsl_gridsearch dsl_grid2d_campus.launch
-
-## Topics
-### Subscribed
-* `/dsl_grid2d/set_start`: [geometry_msgs::Point] Used to set the start position.
-* `/dsl_grid2d/set_start`: [geometry_msgs::Point] Used to set the goal position.
-* `/dsl_grid2d/set_cost`: [geometry_msgs::Point] Used to set the height of a position.
-* `/dsl_grid2d/set_mesh_cost`: [shape_msgs::Mesh] Used to set cell heights to correspond to a given mesh.
-
-### Published 
-* `/dsl_grid2d/trav_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz.
-* `/dsl_grid2d/mesh`: [visualization_msgs::Marker] A marker for the mesh to be displayed in Rviz.
-* `/dsl_grid2d/path`: [nav_msgs::Path] The generated path from start to goal.
-* `/dsl_grid2d/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoints.
+* `map_topic`: [String] The topic of the input map.
+* `lower_thresh`: [int] Limit for free space in 2D map.
+* `upper_thresh`: [int] Limit for occupied space in 2D map.
+* `risk`: [int] the amount of voxels next to occupied spaced that is risk area.
+* `use_gaxebo_odom`: [bool] True if using odom to start planing from.
+* `use_3d`: [bool] True if using 3D planning.
+* `odom_topic`: [string] Topic for odom.
+* `odom_frame_id`: [string] Frame to plan in.
+* `unknown_value`: [int] Traversal const for unknown voxels.
 
 
-## Parameters
-The user must specify either a mesh to load or the size of the occupancy grid.  If both are given, the mesh will be loaded into an occupancy grid of the size given.
 
-* `mesh_filename`: [string] Absolute filepath of a .stl mesh to be loaded into an occupancy grid at runtime.
-* `cells_per_meter`: [double] The resolution of the occupancy grid in cells/meter.
-* `use_textured_mesh`: [bool] Indicates whether a .dae mesh file is availble to be used for visualization.  If mesh_filename is not the empty string, the program will look for a file with the same name with a .dae extension.  This file will be visualized in Rviz.  If set to false, the .stl file will be visualized. 
-* `grid_length`: [int] Length of the grid. If less than or equal to 0, the grid will be the same size as the bounding box of the loaded mesh.
-* `grid_width`: [int] Width of the grid. If less than or equal to 0, the grid will be the same size as the bounding box of the loaded mesh.
-* `grid_xmin`: [int] The world frame x value corresponding to the first cell of the grid.
-* `grid_ymin`: [int] The world frame y value corresponding to the first cell of the grid.
+
 
 ## Issues
 

@@ -12,7 +12,7 @@
 		<param name="resolution" value="0.4" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/world" />
+		<param name="frame_id" type="string" value="world" />
 
 		
 		<!-- maximum range to integrate (speedup!) -->

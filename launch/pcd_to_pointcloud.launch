@@ -1,4 +1,0 @@
-<launch>
-<node pkg = "pcl_ros" type = "pcd_to_pointcloud" name = "show_pointcloud" args = "/home/monsterpc/catkin_workspaces/anton_ws/src/dsl_gridsearch/launch/object3d_binary.pcd _frame_id:=/world" output="screen" />
-
-</launch>

@@ -6,14 +6,11 @@
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <exploration/Frontier.h>
 
 #include "dsl/gridsearch.h"
 #include "dsl/gridcost.h"
 #include "dsl/grid3d.h"
 #include "dsl/grid3dconnectivity.h"
-#include "dsl_gridsearch/occupancy_grid.h"
-
 
 #include <geometry_msgs/Point.h>
 #include <octomap_msgs/Octomap.h>
@@ -52,7 +49,6 @@ private:
     
     // set ending point of planing
     void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
-    void handleSetFrontier(const exploration::FrontierConstPtr& msg);
     void setGoal(Eigen::Vector3d wpos); 
     void setAndPublishPath();
     void publishAllPaths();
@@ -94,6 +90,7 @@ private:
     std::string odom_topic_;
     std::string odom_frame_id_;
     int DSL_UNKNOWN;
+    int DSL_OCCUPIED = 2000000000;
     int risk_;
     int lower_thresh_;
     int upper_thresh_;

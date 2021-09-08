@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <launch>
 	<node name="dsl_grid3d" pkg="dsl_gridsearch" type="dsl_grid3d_node" output="screen">
-		<param name="cells_per_meter" type="double" value="1"/>
 		<param name="use_gazebo_odom" type="bool" value="true"/>
                 <param name="odom_topic" type="String" value="/cartographer/odom"/>
 		<param name="odom_frame_id" type="String" value="map"/>

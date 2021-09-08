@@ -61,8 +61,6 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
     set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("dsl_grid3d/set_goal", 1,
         &DslGrid3D::handleSetGoal, this);
-    set_frontier_sub = nh_.subscribe<exploration::Frontier>("next_frontier", 1,
-        &DslGrid3D::handleSetFrontier, this);
 
 
 
@@ -386,12 +384,6 @@ void DslGrid3D::setStart(Eigen::Vector3d wpos)
     }
     start_pos = wpos; 
     setAndPublishPath();
-}
-
-void DslGrid3D::handleSetFrontier(const exploration::FrontierConstPtr& msg)
-{
-    Eigen::Vector3d wpos(msg->point.x, msg->point.y, msg->point.z);
-    setGoal(wpos);
 }
 
 void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(dsl_gridsearch)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
@@ -13,16 +13,16 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   octomap_ros
   octomap_msgs
-  exploration
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen REQUIRED)
 find_package(DSL REQUIRED)
-find_package(OpenMP REQUIRED)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+find_package(octomap REQUIRED)
+#find_package(OpenMP REQUIRED)
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -105,25 +105,28 @@ catkin_package(
 # include_directories(include)
 include_directories(
   include
-  ${CMAKE_CURRENT_SOURCE_DIR}/extern/trimesh/include
+#  ${CMAKE_CURRENT_SOURCE_DIR}/extern/trimesh/include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIR}
 )
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/gluit/bin)
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/trimesh/bin)
+#link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/gluit/bin)
+#link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/trimesh/bin)
 #get_property(output DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY LINK_DIRECTORIES)
 #message(STATUS ${output})
 
 ## Declare a cpp library
 add_library(dsl_gridsearch
   src/${PROJECT_NAME}/dsl_grid3d.cpp
-  src/${PROJECT_NAME}/occupancy_grid.cpp
+#  src/${PROJECT_NAME}/occupancy_grid.cpp
 )
 
 target_link_libraries(dsl_gridsearch
   #libdsl.so
   ${DSL_LIBRARY}
+  ${Eigen_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
 )
 
 ## Declare a cpp executable
@@ -136,8 +139,8 @@ add_executable(dsl_grid3d_node src/${PROJECT_NAME}/dsl_grid3d_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(dsl_grid3d_node
   dsl_gridsearch
-  libtrimesh.a
-  libgluit.a
+  #libtrimesh.a
+  #libgluit.a
   ${catkin_LIBRARIES}
 )
 

@@ -1,13 +1,13 @@
-# DSL GridSearch: D*-lite on a uniformly spaced 3D or 2D grid integrated with Octomap
+# DSP: D*+ path planner on a uniformly spaced 3D or 2D grid integrated with Octomap and cartographer
 
-This is an implementation of D*-lite graph search on a uniformly spaced 3D or 2D grid for use in global path planning.  This package provides the ability to create an occupancy grid from a .stl mesh or to specify a grid of a given size.  The user can specify start and goal positions by publishing to the relevant topics, and the generated paths will be published by the node.  The user can also publish messages to set grid cells to be occupied or unoccupied, or mesh messages can be sent to set all cells which intersect with the mesh as occupied.  The 2D version is implemented as a traversability map, where the cost of an edge is equal to the height gradient between two grid cells.
+This is an implementation of D*+ graph search on a uniformly spaced 3D or 2D grid for use in global path planning.  This package provides the ability to create an occupancy grid from a .stl mesh or to specify a grid of a given size.  The user can specify start and goal positions by publishing to the relevant topics, and the generated paths will be published by the node.  The user can also publish messages to set grid cells to be occupied or unoccupied, or mesh messages can be sent to set all cells which intersect with the mesh as occupied.  The 2D version is implemented as a traversability map, where the cost of an edge is equal to the height gradient between two grid cells.
 
 # 1 Installation
 We tested DSL GridSearch on Ubuntu 12.04 (Precise) and ROS hydro.
 
 In your ROS package path, clone the repository:
 
-    git clone https://github.com/jhu-asco/dsl_gridsearch.git
+    git clone https://github.com/LTU-RAI/Dsp.git
 
 Install the dsl library
 
@@ -63,50 +63,3 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `odom_topic`: [string] Topic for odom.
 * `odom_frame_id`: [string] Frame to plan in.
 * `unknown_value`: [int] Traversal const for unknown voxels.
-
-
-
-
-
-## Issues
-
-Error 1:
-
-	REQUIRED PACKAGE NOT FOUND
-	DSL_INCLUDE_DIR=/usr/include
-	DSL_LIBRARY=<not found>
-
-FIX: 
-
-	cd 
-	git clone https://github.com/jhu-asco/dsl.git
-	cd dsl
-	git checkout 61cf588668309e87de209cd95f03a0f792a16c33
-	mkdir build
-	cd build
-	cmake ..
-	sudo make install
-
-Error 2: 
-
-	Errors 	<< dsl_gridsearch:make /home/anton/ros_workspaces/temp_ws/logs/dsl_gridsearch/build.make.002.log
-	/usr/bin/ld: /home/anton/ros_workspaces/temp_ws/src/dsl_gridsearch/extern/trimesh/bin/libtrimesh.a(TriMesh_grid.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a PIE object; recompile with -fPIC
-
-FIX:
-
-	git clone https://github.com/Forceflow/trimesh2.git
-	cd trimesh2/
-	sudo make
-	Then: copy libtirmesh.a from “trimesh2/lib.Linux64” to “dsl_gridsearch/extern/trimesh/bin”
-	 And
-	Copy “trimesh2/include” to “dsl_gridsearch/extern/trimesh/include/trimesh2”
-
-Error 3:
-
-	[dsl_grid3d-1] process has died 
-
-FIX:
-
-	cd data 
-	tar -zxvf hackerman2.tar.gz
-

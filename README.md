@@ -1,16 +1,11 @@
 # DSP: D*+ path planner on a uniformly spaced 3D or 2D grid integrated with Octomap and cartographer
 
-This is an implementation of D*+ graph search on a uniformly spaced 3D or 2D grid for use in global path planning.  This package provides the ability to create an occupancy grid from a .stl mesh or to specify a grid of a given size.  The user can specify start and goal positions by publishing to the relevant topics, and the generated paths will be published by the node.  The user can also publish messages to set grid cells to be occupied or unoccupied, or mesh messages can be sent to set all cells which intersect with the mesh as occupied.  The 2D version is implemented as a traversability map, where the cost of an edge is equal to the height gradient between two grid cells.
+This is an implementation of D*+ on a uniformly spaced 3D or 2D grid for use in global path planning. The user can specify start and goal positions by publishing to the relevant topics, and the generated paths will be published by the node.
 
 # 1 Installation
-We tested DSL GridSearch on Ubuntu 12.04 (Precise) and ROS hydro.
-
-In your ROS package path, clone the repository:
-
-    git clone https://github.com/LTU-RAI/Dsp.git
 
 Install the dsl library
-
+```
     cd 
     git clone https://github.com/jhu-asco/dsl.git
     cd dsl
@@ -19,36 +14,38 @@ Install the dsl library
     cd build
     cmake ..
     sudo make install
+```
+We tested DSP on Ubuntu 18.04 and 20.04 thuse ROS melodic and noetic.
 
-Run catkin_make from the workspace root directory, as usual.
 
-If you get linker errors related to trimesh, e.g.
+In your ROS package path, clone the repository:
+```
+    git clone https://github.com/LTU-RAI/Dsp.git
+```
 
-    undefined reference to trimesh::TriMesh::read(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)' collect2: error: ld returned 1 exit status dsl_gridsearch/CMakeFiles/dsl_grid3d_node.dir/build.make:120: recipe for target '/home/sam/robo/devel/lib/dsl_gridsearch/dsl_grid3d_node' failed make[2]: *** [/home/sam/robo/devel/lib/dsl_gridsearch/dsl_grid3d_node] Error 1 CMakeFiles/Makefile2:377: recipe for target 'dsl_gridsearch/CMakeFiles/dsl_grid3d_node.dir/all' failed
-
-then build trimesh2 (https://github.com/Forceflow/trimesh2.git) from source and copy the bin and include directory to extern/trimesh (See https://github.com/jhu-asco/dsl_gridsearch/issues/3)
+Build Dsp `catkin build` from your catkin work space.
 
 ## Quickstart / Minimal Setup
-To use DSL with octomap in gazebo set `frame_id` and `cloud_in` to the map frame used and point-cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsl_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsl_gridsearch/path_to_pose.py`.
+To use DSL with octomap in gazebo set `frame_id` and `cloud_in` to the map frame used and point-cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsp_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsp/path_to_pose.py`.
 The run:
 ```
-rosrun dsl_gridsearch dsl_3d_start.launch
+rosrun dsp dsp_3d_start.launch
 ```
-and publich the gole pose to `/dsl_grid3d/set_goal`.
+and publich the gole pose to `/dsp/set_goal`.
 Observe that the pose has to be inside the map.
 
 
 ## Topics
 ### Subscribed
-* `/dsl_grid3d/set_start`: [geometry_msgs::Point] Used to set the start position.
-* `/dsl_grid3d/set_start`: [geometry_msgs::Point] Used to set the goal position.
+* `/dsp/set_start`: [geometry_msgs::Point] Used to set the start position.
+* `/dsp/set_start`: [geometry_msgs::Point] Used to set the goal position.
 * `/octomap_full`: [octomap_msgs::Octomap] Use for 3D map.
 * `/map`: [nav_msgs::OccupancyGrid] Used for 2D map.
 
 ### Published 
-* `/dsl_grid3d/occupancy_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz used for debugging. Can display different occupancy statuses of voxels in the map by changing the publisher in `dsl_grid3d.cpp`.
-* `/dsl_grid3d/path`: [nav_msgs::Path] The generated path from start to goal.
-* `/dsl_grid3d/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoint
+* `/dsp/occupancy_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz used for debugging. Can display different occupancy statuses of voxels in the map by changing the publisher in `dsp.cpp`.
+* `/dsp/path`: [nav_msgs::Path] The generated path from start to goal.
+* `/dsp/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoint
 
 
 ## Parameters

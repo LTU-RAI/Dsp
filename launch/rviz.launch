@@ -1,4 +1,5 @@
+<?xml version="1.0"?>
 <launch>
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find dsl_gridsearch)/launch/rviz/dslviz.rviz" required="true" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find dsp)/launch/rviz/dslviz.rviz" required="true" />
 
 </launch>

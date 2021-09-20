@@ -1,14 +1,14 @@
-#include "dsl_gridsearch/dsl_grid3d.h"
+#include "dsp/dsp.h"
 
 
-namespace dsl_gridsearch
+namespace dsp
 {
 
-DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
+Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
   nh_(nh),
   nh_private_(nh_private)
 {
-    ROS_INFO("DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private)");        
+    ROS_INFO("Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private)");        
 
     if (!nh_private_.getParam ("map_topic", map_topic_))
         map_topic_ = "octomap_full";
@@ -29,38 +29,38 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         odom_topic_ = "pixy/truth/NWU";
     if (!nh_private_.getParam ("odom_frame_id", odom_frame_id_))
         odom_frame_id_ = "odom";
-    if (!nh_private_.getParam ("unknown_value", DSL_UNKNOWN))
-        DSL_UNKNOWN = 10000;
+    if (!nh_private_.getParam ("unknown_value", DSP_UNKNOWN))
+        DSP_UNKNOWN = 10000;
 
-    occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsl_grid3d/occupancy_map",  0);
-    path_pub_ = nh_.advertise<nav_msgs::Path>( "dsl_grid3d/path",  0);
-    splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "dsl_grid3d/splinepath",  0);
+    occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsp/occupancy_map",  0);
+    path_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/path",  0);
+    splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/splinepath",  0);
 
     if(use_gazebo_odom_)
     {
         ROS_INFO("Using odom ass start");
         set_start_odom_sub_ = nh_.subscribe<nav_msgs::Odometry>(odom_topic_, 1, 
-          &DslGrid3D::handleSetStartOdom, this);
+          &Dsp::handleSetStartOdom, this);
     }
     else
     {
         ROS_INFO("Manualy set start");
-        set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("dsl_grid3d/set_start", 1, 
-          &DslGrid3D::handleSetStart, this);
+        set_start_sub_ = nh_.subscribe<geometry_msgs::Point>("dsp/set_start", 1, 
+          &Dsp::handleSetStart, this);
     }
 
     if(use_3d_){
         get_octomap_sub_ = nh_.subscribe<octomap_msgs::Octomap>(map_topic_, 1,
-            &DslGrid3D::octomap_data_callback, this);
+            &Dsp::octomap_data_callback, this);
     }
     else {
         get_octomap_sub_ = nh_.subscribe<nav_msgs::OccupancyGrid>(map_topic_, 1,
-            &DslGrid3D::occupancy_grid_callback, this);
-        height_metric = 1;
+            &Dsp::occupancy_grid_callback, this);
+        height_voxel = 1;
     }
 
-    set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("dsl_grid3d/set_goal", 1,
-        &DslGrid3D::handleSetGoal, this);
+    set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("dsp/set_goal", 1,
+        &Dsp::handleSetGoal, this);
 
 
 
@@ -69,27 +69,27 @@ DslGrid3D::DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 }
 
 // 2D occupancyGrid callback 
-void DslGrid3D::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
+void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
 
     if (length * width == msg->info.width * msg->info.height){
-        int size = length_metric * width_metric;
+        int size = length_voxel * width_voxel;
         for (int i = 0; i < size; i++){
-            if(msg->data[i] > upper_thresh_ && occupancy_map[i] != DSL_OCCUPIED){
-                Eigen::Vector3d pos(i % length_metric, i / length_metric, 0);
+            if(msg->data[i] > upper_thresh_ && occupancy_map[i] != DSP_OCCUPIED){
+                Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
                 saftyMarginal(pos, true);
-                occupancy_map[i] = DSL_OCCUPIED;
-                gdsl_->SetCost(pos, DSL_OCCUPIED);
+                occupancy_map[i] = DSP_OCCUPIED;
+                gdsl_->SetCost(pos, DSP_OCCUPIED);
             }
-            else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1 && occupancy_map[i] >= DSL_UNKNOWN){
-                if (occupancy_map[i] == DSL_OCCUPIED){
-                    Eigen::Vector3d pos(i % length_metric, i / length_metric, 0);
+            else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1 && occupancy_map[i] >= DSP_UNKNOWN){
+                if (occupancy_map[i] == DSP_OCCUPIED){
+                    Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
                     gdsl_->SetCost(pos, 1);
                     occupancy_map[i] = 1;
                     saftyMarginalFree(pos);
                 } else {
-                    Eigen::Vector3d pos(i % length_metric, i / length_metric, 0);
-                    gdsl_->SetCost(pos, occupancy_map[i] - DSL_UNKNOWN + 1);
-                    occupancy_map[i] = occupancy_map[i] - DSL_UNKNOWN + 1;
+                    Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
+                    gdsl_->SetCost(pos, occupancy_map[i] - DSP_UNKNOWN + 1);
+                    occupancy_map[i] = occupancy_map[i] - DSP_UNKNOWN + 1;
                 }
             }
         }
@@ -104,23 +104,23 @@ void DslGrid3D::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& m
         pmin(1) = msg->info.origin.position.y;
         pmin(2) = 0;
 
-        length_metric = length; 
-        width_metric = width; 
-        int size = length_metric * width_metric;
+        length_voxel = length; 
+        width_voxel = width; 
+        int size = length_voxel * width_voxel;
         occupancy_map.reset(new double[size]);
 
         for(int i = 0; i < size; i++){
-            occupancy_map[i] = DSL_UNKNOWN; 
+            occupancy_map[i] = DSP_UNKNOWN; 
         }
 
         for(int i = 0; i < size; i++){
             if(msg->data[i] > upper_thresh_){
-                Eigen::Vector3d pos(i % length_metric, i / length_metric, 0);
+                Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
                 saftyMarginal(pos, false);
-                occupancy_map[i] = DSL_OCCUPIED;
+                occupancy_map[i] = DSP_OCCUPIED;
             }
-            else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1 && occupancy_map[i] >= DSL_UNKNOWN){
-                occupancy_map[i] = occupancy_map[i] - DSL_UNKNOWN + 1;
+            else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1 && occupancy_map[i] >= DSP_UNKNOWN){
+                occupancy_map[i] = occupancy_map[i] - DSP_UNKNOWN + 1;
             }
                 
         }
@@ -131,7 +131,7 @@ void DslGrid3D::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& m
 }
 
 // octomap 3D callback
-void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
+void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
     std::shared_ptr<octomap::OcTree> tree(dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg)));
     res_octomap = tree->getResolution();
     double length_test, width_test, height_test;
@@ -140,7 +140,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) 
 
     if (length_test * width_test * height_test == length * width * height)
     {
-        updateGDSL(tree);
+        updateGDSP(tree);
     }
     else
     {
@@ -148,7 +148,7 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) 
         length = length_test;
         width = width_test;
         height = height_test;
-        buildGDSL(tree);
+        buildGDSP(tree);
         grid_built = true;
     }
     publishOccupancyGrid();
@@ -156,19 +156,19 @@ void DslGrid3D::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) 
 }
 
 
-void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
+void Dsp::buildGDSP(std::shared_ptr<octomap::OcTree> tree)
 {
     int count = 0;
-    length_metric = length/res_octomap;
-    width_metric = width/res_octomap;
-    height_metric = height/res_octomap;
+    length_voxel = length/res_octomap;
+    width_voxel = width/res_octomap;
+    height_voxel = height/res_octomap;
 
-    int size = length_metric * width_metric * height_metric;
+    int size = length_voxel * width_voxel * height_voxel;
     occupancy_map.reset(new double[size]);
 
    for(int i = 0; i < size; i++)
    {
-     occupancy_map[i] = DSL_UNKNOWN; 
+     occupancy_map[i] = DSP_UNKNOWN; 
    }
 
    for(octomap::OcTree::leaf_iterator it = tree->begin_leafs(), end = tree->end_leafs(); it != end; ++it)
@@ -190,14 +190,14 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
             do{
                 int k = -n/2;
                 do{
-	            int idx = ((int) pos(0) + i) + (((int) pos(1) + j) * length_metric) + (((int) pos(2) + k) * length_metric * width_metric);
+	            int idx = ((int) pos(0) + i) + (((int) pos(1) + j) * length_voxel) + (((int) pos(2) + k) * length_voxel * width_voxel);
 	            if(tree->isNodeOccupied(*it)) {
                         Eigen::Vector3d p(pos(0) + i, pos(1) + j, pos(2) + k);
                         saftyMarginal(p, false);
-		        occupancy_map[idx] = DSL_OCCUPIED;
+		        occupancy_map[idx] = DSP_OCCUPIED;
 	            }
-                    else {//if (occupancy_map[idx] >= DSL_UNKNOWN){
-                        occupancy_map[idx] = occupancy_map[idx] - DSL_UNKNOWN + 1;
+                    else {//if (occupancy_map[idx] >= DSP_UNKNOWN){
+                        occupancy_map[idx] = occupancy_map[idx] - DSP_UNKNOWN + 1;
                     }
                     k++;
                 } while (k < n/2);
@@ -211,15 +211,15 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
     //Bound occupancy_map from top and bottom
 /*      for(int x = 0; x < ogrid_->getLength(); x++)
     {  
-        for(int y = 0; y < width_metric; y++)  
+        for(int y = 0; y < width_voxel; y++)  
         {
-            //for(int z = 0; z < height_metric; z++)  
+            //for(int z = 0; z < height_voxel; z++)  
             //{
                 Eigen::Vector3i gpMin(x, y, zmin);
                 Eigen::Vector3d wpMin = ogrid_->gridToPosition(gpMin);
                 ogrid_->setOccupied(wpMin, true);
 
-                Eigen::Vector3i gpMax(x, y, height_metric-1);
+                Eigen::Vector3i gpMax(x, y, height_voxel-1);
                 Eigen::Vector3d wpMax = ogrid_->gridToPosition(gpMax);
                 ogrid_->setOccupied(wpMax, true);
             //}
@@ -229,17 +229,17 @@ void DslGrid3D::buildGDSL(std::shared_ptr<octomap::OcTree> tree)
   buildGraph();
 }
 
-void DslGrid3D::buildGraph(){
+void Dsp::buildGraph(){
     ROS_INFO("Building search graph...");
-    grid_.reset(new dsl::Grid3d(length_metric, width_metric, height_metric, 
+    grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
         occupancy_map.get(),
-        1, 1, 1, 1, DSL_OCCUPIED + 1));
+        1, 1, 1, 1, DSP_OCCUPIED + 1));
     connectivity_.reset(new dsl::Grid3dConnectivity(*grid_));
     gdsl_.reset(new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true));
     ROS_INFO("Graph built");
 }
 
-void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
+void Dsp::updateGDSP(std::shared_ptr<octomap::OcTree> tree)
 {
     for(octomap::OcTree::leaf_iterator it = tree->begin_leafs(), end = tree->end_leafs(); it != end; ++it)
     {
@@ -261,21 +261,21 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
             do{
                 int k = -n/2;
                 do{
-	            int idx = ((int) pos(0) + i) + ((int) pos(1) + j) *length_metric + ((int) pos(2) + k) *length_metric*width_metric;
+	            int idx = ((int) pos(0) + i) + ((int) pos(1) + j) *length_voxel + ((int) pos(2) + k) *length_voxel*width_voxel;
                     Eigen::Vector3d p(pos(0) + i, pos(1) + j, pos(2) + k);
 
-                    if(tree->isNodeOccupied(*it) and occupancy_map[idx] != DSL_OCCUPIED)
+                    if(tree->isNodeOccupied(*it) and occupancy_map[idx] != DSP_OCCUPIED)
                     {
-                        gdsl_->SetCost(p, DSL_OCCUPIED);
-                        occupancy_map[idx] = DSL_OCCUPIED;
+                        gdsl_->SetCost(p, DSP_OCCUPIED);
+                        occupancy_map[idx] = DSP_OCCUPIED;
                         saftyMarginal(p, true);
                     }			
-                    else if(!tree->isNodeOccupied(*it)  and occupancy_map[idx] >= DSL_UNKNOWN)
+                    else if(!tree->isNodeOccupied(*it)  and occupancy_map[idx] >= DSP_UNKNOWN)
                     {
-                        if(occupancy_map[idx] < DSL_OCCUPIED)
+                        if(occupancy_map[idx] < DSP_OCCUPIED)
                         {
-                            gdsl_->SetCost(p, occupancy_map[idx] - DSL_UNKNOWN + 1);
-                            occupancy_map[idx] = occupancy_map[idx] - DSL_UNKNOWN + 1;
+                            gdsl_->SetCost(p, occupancy_map[idx] - DSP_UNKNOWN + 1);
+                            occupancy_map[idx] = occupancy_map[idx] - DSP_UNKNOWN + 1;
                         }
                         else
                         {
@@ -295,7 +295,7 @@ void DslGrid3D::updateGDSL(std::shared_ptr<octomap::OcTree> tree)
 }
 
 // adding of safty margianl to occupied space inprove safty
-void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
+void Dsp::saftyMarginal(Eigen::Vector3d pos, bool update)
 {
     Eigen::Vector3d local_pose;
     for(int i = -risk_; i <= risk_; i++){
@@ -304,22 +304,22 @@ void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
                 int x = pos(0) + i;
                 int y = pos(1) + j;
                 int z = pos(2) + k;
-                if(x >= 0 && x < length_metric && y >= 0 && y < width_metric && z >= 0 && z < height_metric){
-	            int idx = x + y*length_metric + z*length_metric*width_metric;
+                if(x >= 0 && x < length_voxel && y >= 0 && y < width_voxel && z >= 0 && z < height_voxel){
+	            int idx = x + y*length_voxel + z*length_voxel*width_voxel;
                     local_pose << pos(0) + i, pos(1) + j, pos(2) + k;
                     int sum = i * i + j * j + k * k;
                     if (!sum){ // sum = 0 > current ocupied space
                         continue;
                     }
-                    int cost = DSL_UNKNOWN / (sum + 2);
+                    int cost = DSP_UNKNOWN / (sum + 2);
                     if(occupancy_map[idx] < cost){
                         occupancy_map[idx] = cost;
                         if(update){
                             gdsl_->SetCost(local_pose, cost);
                         }
                     }
-                    else if (DSL_UNKNOWN == occupancy_map[idx] or (occupancy_map[idx] >= DSL_UNKNOWN and occupancy_map[idx] < DSL_UNKNOWN + cost)){
-                        cost += DSL_UNKNOWN;
+                    else if (DSP_UNKNOWN == occupancy_map[idx] or (occupancy_map[idx] >= DSP_UNKNOWN and occupancy_map[idx] < DSP_UNKNOWN + cost)){
+                        cost += DSP_UNKNOWN;
                         occupancy_map[idx] = cost;
                         if(update){
                             gdsl_->SetCost(local_pose, cost);
@@ -332,7 +332,7 @@ void DslGrid3D::saftyMarginal(Eigen::Vector3d pos, bool update)
 }
 
 // adding safty marginal to cells descoverd free
-void DslGrid3D::saftyMarginalFree(Eigen::Vector3d pos)
+void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
 {
     int sum = risk_ * risk_ * 3 + 1;
     int index;
@@ -343,9 +343,9 @@ void DslGrid3D::saftyMarginalFree(Eigen::Vector3d pos)
                 int x = pos(0) + i;
                 int y = pos(1) + j;
                 int z = pos(2) + k;
-                if(x >= 0 && x < length_metric && y >= 0 && y < width_metric && z >= 0 && z < height_metric){
-	            int idx = x + y*length_metric + z*length_metric*width_metric;
-                    if (occupancy_map[idx] == DSL_OCCUPIED){
+                if(x >= 0 && x < length_voxel && y >= 0 && y < width_voxel && z >= 0 && z < height_voxel){
+	            int idx = x + y*length_voxel + z*length_voxel*width_voxel;
+                    if (occupancy_map[idx] == DSP_OCCUPIED){
                         if (i * i + j * j + k * k < sum){
                             sum = i * i + j * j + k * k;
                             local_pose << pos(0) + i, pos(1) + j, pos(2) + k;
@@ -357,27 +357,27 @@ void DslGrid3D::saftyMarginalFree(Eigen::Vector3d pos)
         }
     }
     if (sum <= risk_ * risk_ * 3){
-        int cost = DSL_UNKNOWN / (sum + 2);
+        int cost = DSP_UNKNOWN / (sum + 2);
         occupancy_map[index] = cost;
         gdsl_->SetCost(local_pose, cost);
 
     }
 }
 
-void DslGrid3D::handleSetStartOdom(const nav_msgs::Odometry msg)
+void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
     Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
     setStart(wpos);
 }
 
 
-void DslGrid3D::handleSetStart(const geometry_msgs::PointConstPtr& msg)
+void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
     Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
     setStart(wpos);
 }
 
-void DslGrid3D::setStart(Eigen::Vector3d wpos)
+void Dsp::setStart(Eigen::Vector3d wpos)
 {
     if(!use_3d_){
         wpos[2] = 0;
@@ -386,13 +386,13 @@ void DslGrid3D::setStart(Eigen::Vector3d wpos)
     setAndPublishPath();
 }
 
-void DslGrid3D::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
+void Dsp::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
     Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
     setGoal(wpos);
 }
 
-void DslGrid3D::setGoal(Eigen::Vector3d wpos)
+void Dsp::setGoal(Eigen::Vector3d wpos)
 {
     if(!use_3d_){
         wpos[2] = 0;
@@ -401,7 +401,7 @@ void DslGrid3D::setGoal(Eigen::Vector3d wpos)
     setAndPublishPath();
 }
 
-void DslGrid3D::setAndPublishPath(){
+void Dsp::setAndPublishPath(){
     if(!grid_built){
         return;
     }
@@ -432,7 +432,7 @@ void DslGrid3D::setAndPublishPath(){
 }
 
 // transfomre a pose betewn IRL cordinates and map cordinate 
-Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
+Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -441,47 +441,47 @@ Eigen::Vector3d DslGrid3D::posRes(Eigen::Vector3d wpos)
     return wpos;
 }
 
-void DslGrid3D::planAllPaths()
+void Dsp::planAllPaths()
 {
     gdsl_->Plan(path_);
     //gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
-void DslGrid3D::publishAllPaths()
+void Dsp::publishAllPaths()
 {
-  path_pub_.publish(dslPathToRosMsg(path_, false));
+  path_pub_.publish(dspPathToRosMsg(path_, false));
   //splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
 }
 
 // transfom paht to ros paht
-nav_msgs::Path DslGrid3D::dslPathToRosMsg(const dsl::GridPath<3> &dsl_path, bool isSplined)
+nav_msgs::Path Dsp::dspPathToRosMsg(const dsl::GridPath<3> &dsp_path, bool isSplined)
 {
   std::vector<Eigen::Vector3d> path;
-  for(int i = 0; i < dsl_path.cells.size(); i++)
+  for(int i = 0; i < dsp_path.cells.size(); i++)
   {
-    path.push_back(dsl_path.cells[i].c * res_octomap);
+    path.push_back(dsp_path.cells[i].c * res_octomap);
   }
-  return dslPathToRosMsg(path, isSplined);
+  return dspPathToRosMsg(path, isSplined);
 }
 
-nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &dsl_path, bool isSplined)
+nav_msgs::Path Dsp::dspPathToRosMsg(const std::vector<Eigen::Vector3d> &dsp_path, bool isSplined)
 {
   nav_msgs::Path msg;  
   
   msg.header.frame_id = odom_frame_id_; 
-  msg.poses.resize(dsl_path.size());
-  for(int i = 0; i < dsl_path.size(); i++)
+  msg.poses.resize(dsp_path.size());
+  for(int i = 0; i < dsp_path.size(); i++)
   {
     if(isSplined){
-        msg.poses[i].pose.position.x = dsl_path[i][0] * res_octomap + pmin(0);
-        msg.poses[i].pose.position.y = dsl_path[i][1] * res_octomap + pmin(1);
-        msg.poses[i].pose.position.z = dsl_path[i][2] * res_octomap + pmin(2);
+        msg.poses[i].pose.position.x = dsp_path[i][0] * res_octomap + pmin(0);
+        msg.poses[i].pose.position.y = dsp_path[i][1] * res_octomap + pmin(1);
+        msg.poses[i].pose.position.z = dsp_path[i][2] * res_octomap + pmin(2);
     }
     else{
-        msg.poses[i].pose.position.x = dsl_path[i][0] + pmin(0);
-        msg.poses[i].pose.position.y = dsl_path[i][1] + pmin(1);
-        msg.poses[i].pose.position.z = dsl_path[i][2] + pmin(2);
+        msg.poses[i].pose.position.x = dsp_path[i][0] + pmin(0);
+        msg.poses[i].pose.position.y = dsp_path[i][1] + pmin(1);
+        msg.poses[i].pose.position.z = dsp_path[i][2] + pmin(2);
     }
   }
 
@@ -489,30 +489,30 @@ nav_msgs::Path DslGrid3D::dslPathToRosMsg(const std::vector<Eigen::Vector3d> &ds
 }
 
 // publishing map usedfule when debuging
-void DslGrid3D::publishOccupancyGrid()
+void Dsp::publishOccupancyGrid()
 {
     visualization_msgs::Marker occmap_viz;
 
     std::vector<geometry_msgs::Point> marker_pos;
     std::vector<geometry_msgs::Point> risk_pos;
      
-    for(double x = 0; x < length_metric; x++)
+    for(double x = 0; x < length_voxel; x++)
     {
 
-        for(double y = 0; y < width_metric; y++)
+        for(double y = 0; y < width_voxel; y++)
         {
-            for(double z = 0; z < height_metric; z++)
+            for(double z = 0; z < height_voxel; z++)
             {
                 Eigen::Vector3d pos(x, y, z);
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-                //if(gdsl_->GetCost(pos) == DSL_OCCUPIED)
-                //if(gdsl_->GetCost(pos) == DSL_UNKNOWN)
+                //if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
+                //if(gdsl_->GetCost(pos) == DSP_UNKNOWN)
                 if(gdsl_->GetCost(pos) == 1)
-                //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
-                //if(gdsl_->GetCost(pos) < DSL_OCCUPIED and gdsl_->GetCost(pos) > DSL_UNKNOWN)
-                //if(gdsl_->GetCost(pos) >= DSL_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSL_UNKNOWN)
+                //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
+                //if(gdsl_->GetCost(pos) < DSP_OCCUPIED and gdsl_->GetCost(pos) > DSP_UNKNOWN)
+                //if(gdsl_->GetCost(pos) >= DSP_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 {
                     geometry_msgs::Point pt;
                     //pt.x = (x + pmin(0)) * res_octomap;
@@ -529,7 +529,7 @@ void DslGrid3D::publishOccupancyGrid()
 
     occmap_viz.header.frame_id = odom_frame_id_; ///world /pixy/velodyne
     occmap_viz.header.stamp = ros::Time();
-    occmap_viz.ns = "dsl_grid3d";
+    occmap_viz.ns = "dsp";
     occmap_viz.id = 1;
     occmap_viz.type = visualization_msgs::Marker::CUBE_LIST;
     occmap_viz.action = visualization_msgs::Marker::ADD;

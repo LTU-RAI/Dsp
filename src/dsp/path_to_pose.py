@@ -21,8 +21,8 @@ class Server:
 
         self.vel_msg = Vector3Stamped()
 
-#        self.waypoint_subscriber = rospy.Subscriber('/dsl_grid3d/optpath', Path, self.waypoint_callback)
-        self.waypoint_subscriber = rospy.Subscriber('/dsl_grid3d/path', Path, self.waypoint_callback)
+#        self.waypoint_subscriber = rospy.Subscriber('/dsp/optpath', Path, self.waypoint_callback)
+        self.waypoint_subscriber = rospy.Subscriber('/dsp/path', Path, self.waypoint_callback)
         
         rospy.Subscriber("/pixy/truth/NWU", Odometry, self.read_callback)
 		

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>dsl_gridsearch</name>
+  <name>dsp</name>
   <version>0.0.1</version>
   <description>A package for D*-lite planning on a 3D occupancy grid or 2D traversability map.</description>
 

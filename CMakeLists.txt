@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(dsl_gridsearch)
+project(dsp)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 ## Find catkin macros and libraries
@@ -117,20 +117,18 @@ include_directories(
 #message(STATUS ${output})
 
 ## Declare a cpp library
-add_library(dsl_gridsearch
-  src/${PROJECT_NAME}/dsl_grid3d.cpp
-#  src/${PROJECT_NAME}/occupancy_grid.cpp
+add_library(dsp
+  src/${PROJECT_NAME}/dsp.cpp
 )
 
-target_link_libraries(dsl_gridsearch
-  #libdsl.so
+target_link_libraries(dsp
   ${DSL_LIBRARY}
   ${Eigen_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
 )
 
 ## Declare a cpp executable
-add_executable(dsl_grid3d_node src/${PROJECT_NAME}/dsl_grid3d_node.cpp)
+add_executable(dsp_node src/${PROJECT_NAME}/dsp_node.cpp)
 #add_executable(path_to_pose src/${PROJECT_NAME}/path_to_pose.py)
 
 ## Add cmake target dependencies of the executable/library
@@ -138,10 +136,8 @@ add_executable(dsl_grid3d_node src/${PROJECT_NAME}/dsl_grid3d_node.cpp)
 # add_dependencies(dslviz_node dslviz_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(dsl_grid3d_node
-  dsl_gridsearch
-  #libtrimesh.a
-  #libgluit.a
+target_link_libraries(dsp_node
+  dsp
   ${catkin_LIBRARIES}
 )
 

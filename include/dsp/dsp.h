@@ -22,13 +22,13 @@
 #include <memory>
 #include <Eigen/Dense>
 
-namespace dsl_gridsearch
+namespace dsp
 {
 
-class DslGrid3D
+class Dsp
 {
 public:
-    DslGrid3D(ros::NodeHandle nh, ros::NodeHandle nh_private);
+    Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private);
 
 private:
     // callbac for map
@@ -36,8 +36,8 @@ private:
     void occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg);
     //3D
     void octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg);
-    void updateGDSL(std::shared_ptr<octomap::OcTree> tree);
-    void buildGDSL(std::shared_ptr<octomap::OcTree> tree);      
+    void updateGDSP(std::shared_ptr<octomap::OcTree> tree);
+    void buildGDSP(std::shared_ptr<octomap::OcTree> tree);      
     void saftyMarginal(Eigen::Vector3d pos, bool update);
     void saftyMarginalFree(Eigen::Vector3d pos);
     void buildGraph();  
@@ -53,8 +53,8 @@ private:
     void setAndPublishPath();
     void publishAllPaths();
     void planAllPaths();
-    nav_msgs::Path dslPathToRosMsg(const dsl::GridPath<3>& dsl_path, bool isSplined);
-    nav_msgs::Path dslPathToRosMsg(const std::vector<Eigen::Vector3d>& dsl_path, bool isSplined);       
+    nav_msgs::Path dspPathToRosMsg(const dsl::GridPath<3>& dsp_path, bool isSplined);
+    nav_msgs::Path dspPathToRosMsg(const std::vector<Eigen::Vector3d>& dsp_path, bool isSplined);       
     void publishOccupancyGrid();
     Eigen::Vector3d posRes(Eigen::Vector3d wpos);               
     
@@ -69,11 +69,7 @@ private:
     ros::Subscriber set_frontier_sub;
     ros::Subscriber get_octomap_sub_;
     
-    // should this stay?
-    ros::Subscriber set_occupied_sub_;
-    ros::Subscriber set_unoccupied_sub_;        
-    
-    // dsl variables
+    // dsp variables
     std::shared_ptr<dsl::Grid3d> grid_;
     dsl::GridCost<3> cost_;
     std::shared_ptr<dsl::Grid3dConnectivity> connectivity_;
@@ -89,15 +85,15 @@ private:
     std::string map_topic_;
     std::string odom_topic_;
     std::string odom_frame_id_;
-    int DSL_UNKNOWN;
-    int DSL_OCCUPIED = 2000000000;
+    int DSP_UNKNOWN;
+    int DSP_OCCUPIED = 2000000000;
     int risk_;
     int lower_thresh_;
     int upper_thresh_;
     
-    int length_metric = 0;
-    int width_metric = 0;
-    int height_metric = 0;
+    int length_voxel = 0;
+    int width_voxel = 0;
+    int height_voxel = 0;
     double length = -1.0;
     double width = -1.0;
     double height = -1.0;

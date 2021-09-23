@@ -55,7 +55,7 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `lower_thresh`: [int] Limit for free space in 2D map.
 * `upper_thresh`: [int] Limit for occupied space in 2D map.
 * `risk`: [int] the amount of voxels next to occupied spaced that is risk area.
-* `use_gaxebo_odom`: [bool] True if using odom to start planing from.
+* `use_gazebo_odom`: [bool] True if using odom to start planing from.
 * `use_3d`: [bool] True if using 3D planning.
 * `odom_topic`: [string] Topic for odom.
 * `odom_frame_id`: [string] Frame to plan in.

@@ -12,7 +12,6 @@
 #include "dsl/grid3d.h"
 #include "dsl/grid3dconnectivity.h"
 
-#include <geometry_msgs/Point.h>
 #include <octomap_msgs/Octomap.h>
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>

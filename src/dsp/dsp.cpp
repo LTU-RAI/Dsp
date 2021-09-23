@@ -158,10 +158,9 @@ void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
 
 void Dsp::buildGDSP(std::shared_ptr<octomap::OcTree> tree)
 {
-    int count = 0;
-    length_voxel = length/res_octomap;
-    width_voxel = width/res_octomap;
-    height_voxel = height/res_octomap;
+    length_voxel = round(length/res_octomap);
+    width_voxel = round(width/res_octomap);
+    height_voxel = round(height/res_octomap);
 
     int size = length_voxel * width_voxel * height_voxel;
     occupancy_map.reset(new double[size]);
@@ -231,6 +230,7 @@ void Dsp::buildGDSP(std::shared_ptr<octomap::OcTree> tree)
 
 void Dsp::buildGraph(){
     ROS_INFO("Building search graph...");
+    int size = length_voxel * width_voxel * height_voxel;
     grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
         occupancy_map.get(),
         1, 1, 1, 1, DSP_OCCUPIED + 1));

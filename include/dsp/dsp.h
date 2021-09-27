@@ -76,6 +76,7 @@ private:
     dsl::GridPath<3> path_, splinecells_;
     std::vector<Eigen::Vector3d> splinepath_;
     std::shared_ptr<double[]> occupancy_map;    
+    std::shared_ptr<bool[]> unknown_mask;    
 
     // launch params
     double spline_step_;
@@ -86,6 +87,8 @@ private:
     std::string odom_frame_id_;
     int DSP_UNKNOWN;
     int DSP_OCCUPIED = 2000000000;
+    int DSP_RISK = 100000;
+    int DSP_LIM = 25000;
     int risk_;
     int lower_thresh_;
     int upper_thresh_;

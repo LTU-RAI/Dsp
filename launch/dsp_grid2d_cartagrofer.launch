@@ -4,7 +4,7 @@
 		<param name="use_gazebo_odom" type="bool" value="true"/>
                 <param name="odom_topic" type="String" value="/cartographer/odom"/>
 		<param name="odom_frame_id" type="String" value="map"/>
-		<param name="map_topic" type="String" value="/map"/>
+		<param name="map_topic" type="String" value="spot/map"/>
 		<param name="use_3d" type="bool" value="false"/>
 	</node>
 </launch>

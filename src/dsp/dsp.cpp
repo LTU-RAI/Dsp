@@ -35,6 +35,7 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsp/occupancy_map",  0);
     path_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/path",  0);
     splinepath_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/splinepath",  0);
+    path_fail_pub_ = nh_.advertise<std_msgs::Bool>("dsp/path_fail", 0);
 
     if(use_gazebo_odom_)
     {
@@ -445,6 +446,8 @@ void Dsp::setAndPublishPath(){
     if (!gdsl_->SetGoal(grid_goal))
     {
         ROS_WARN("SetGoal faild");
+        path_fail_pub_.publish(data=false);
+        
         return;
     }
 

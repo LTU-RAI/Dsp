@@ -2,6 +2,7 @@
 #define _DSL_GRID_3D_H_
 
 #include <ros/ros.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
@@ -62,6 +63,7 @@ private:
     ros::Publisher occ_map_viz_pub_;
     ros::Publisher path_pub_;
     ros::Publisher splinepath_pub_;     
+    ros::Publisher path_fail_pub_;
     ros::Subscriber set_start_sub_;
     ros::Subscriber set_start_odom_sub_;
     ros::Subscriber set_goal_sub_;

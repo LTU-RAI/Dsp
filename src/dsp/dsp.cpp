@@ -134,7 +134,7 @@ void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
         }
         buildGraph();
     }
-    publishOccupancyGrid();
+    //publishOccupancyGrid();
     return;
 }
 
@@ -159,7 +159,7 @@ void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
         buildGDSP(tree);
         grid_built = true;
     }
-    publishOccupancyGrid();
+    //publishOccupancyGrid();
     //setAndPublishPath();
 }
 
@@ -446,7 +446,7 @@ void Dsp::setAndPublishPath(){
     if (!gdsl_->SetGoal(grid_goal))
     {
         ROS_WARN("SetGoal faild");
-        path_fail_pub_.publish(data=false);
+        path_fail_pub_.publish(false);
         
         return;
     }

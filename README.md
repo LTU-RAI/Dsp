@@ -60,3 +60,16 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `odom_topic`: [string] Topic for odom.
 * `odom_frame_id`: [string] Frame to plan in.
 * `unknown_value`: [int] Traversal const for unknown voxels.
+
+# Paper
+Thank you for citing the [$D^*_{+}$ paper](https://arxiv.org/abs/2112.05563),if you use the $D^*_{+}$ paht planner in your work
+```
+@misc{karlsson2021d,
+      title={$D^*_{+}$: A Generic Platform-Agnostic and Risk-Aware Path Planing Framework with an Expandable Grid}, 
+      author={Samuel Karlsson and Anton Koval and Christoforos Kanellakis and Ali-akbar Agha-mohammadi and George Nikolakopoulos},
+      year={2021},
+      eprint={2112.05563},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
+```

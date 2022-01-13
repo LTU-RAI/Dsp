@@ -17,14 +17,17 @@ class Server:
         self.current_time = current_time if current_time is not None else time.time()
         self.last_time = self.current_time
 
-        self.vel_publisher = rospy.Publisher('/pixy/reference', Vector3Stamped, queue_size = 10)
+        #self.vel_publisher = rospy.Publisher('/pixy/reference', Vector3Stamped, queue_size = 10)
+        self.vel_publisher = rospy.Publisher('/shafter3d/reference', PoseStamped, queue_size = 1)
 
-        self.vel_msg = Vector3Stamped()
+        #self.vel_msg = Vector3Stamped()
+        self.vel_msg = PoseStamped()
 
 #        self.waypoint_subscriber = rospy.Subscriber('/dsp/optpath', Path, self.waypoint_callback)
         self.waypoint_subscriber = rospy.Subscriber('/dsp/path', Path, self.waypoint_callback)
         
-        rospy.Subscriber("/pixy/truth/NWU", Odometry, self.read_callback)
+        rospy.Subscriber("/odometry/imu", Odometry, self.read_callback)
+        #rospy.Subscriber("/pixy/truth/NWU", Odometry, self.read_callback)
 		
     def waypoint_callback(self, msg):
         print("geting waypoints")

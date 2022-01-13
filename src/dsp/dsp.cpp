@@ -65,7 +65,7 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
 
     start_pos << 0,0,0; 
-    goal_pos << 0,0,0; 
+    goal_pos << 0,0,0.8; 
 }
 
 // 2D occupancyGrid callback 

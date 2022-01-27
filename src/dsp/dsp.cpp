@@ -444,6 +444,7 @@ Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 void Dsp::planAllPaths()
 {
     gdsl_->Plan(path_);
+    //ROS_INFO("%f",path_.cost);
     //gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
@@ -507,9 +508,9 @@ void Dsp::publishOccupancyGrid()
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-                //if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
+                if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSP_UNKNOWN)
-                if(gdsl_->GetCost(pos) == 1)
+                //if(gdsl_->GetCost(pos) == 1)
                 //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSP_OCCUPIED and gdsl_->GetCost(pos) > DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) >= DSP_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSP_UNKNOWN)

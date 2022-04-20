@@ -1,0 +1,4 @@
+geometry_msgs/Point start
+geometry_msgs/Point stop
+---
+float64 cost

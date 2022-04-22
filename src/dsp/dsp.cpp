@@ -13,7 +13,7 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     if (!nh_private_.getParam ("map_topic", map_topic_))
         map_topic_ = "octomap_full";
     if (!nh_private_.getParam ("spline_step_", spline_step_))
-        spline_step_ = .1;
+        spline_step_ = 0.01;
     if (!nh_private_.getParam ("lower_thresh", lower_thresh_))
         lower_thresh_ = 59;
     if (!nh_private_.getParam ("upper_thresh", upper_thresh_))
@@ -63,9 +63,10 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         &Dsp::handleSetGoal, this);
 
 
+    tran = &listener;
 
     start_pos << 0,0,0; 
-    goal_pos << 0,0,0.8; 
+    goal_pos << 0,0,0; 
 }
 
 // 2D occupancyGrid callback 
@@ -127,6 +128,7 @@ void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
         buildGraph();
     }
     publishOccupancyGrid();
+    setAndPublishPath();
     return;
 }
 
@@ -152,7 +154,7 @@ void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
         grid_built = true;
     }
     publishOccupancyGrid();
-    //setAndPublishPath();
+    setAndPublishPath();
 }
 
 
@@ -367,7 +369,11 @@ void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
 void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
     Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
-    setStart(wpos);
+    //setStart(wpos);
+    //std::cout<<"pos comp"<<std::endl;
+    //std::cout<<wpos<<std::endl;
+    //setTfStart();
+    
 }
 
 
@@ -377,13 +383,31 @@ void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
     setStart(wpos);
 }
 
+void Dsp::setTfStart(){
+    tf::StampedTransform transform;
+    try {
+        tran->lookupTransform(odom_frame_id_, "base_link_shafter", ros::Time(0.0), transform);
+    } catch (tf::TransformException ex){
+        ROS_ERROR("%s", ex.what());
+        return;
+    }
+    Eigen::Vector3d wpos(transform.getOrigin().x(),
+            transform.getOrigin().y(),
+            transform.getOrigin().z());
+    if(!use_3d_)
+        wpos[2] = 0.0;
+    //std::cout<<wpos<<std::endl;
+    setStart(wpos);
+
+}
+
 void Dsp::setStart(Eigen::Vector3d wpos)
 {
     if(!use_3d_){
         wpos[2] = 0;
     }
     start_pos = wpos; 
-    setAndPublishPath();
+    //setAndPublishPath();
 }
 
 void Dsp::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
@@ -405,6 +429,7 @@ void Dsp::setAndPublishPath(){
     if(!grid_built){
         return;
     }
+    setTfStart();
     Eigen::Vector3d grid_start = posRes(start_pos);
     Eigen::Vector3d grid_goal = posRes(goal_pos);
 
@@ -444,14 +469,14 @@ Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 void Dsp::planAllPaths()
 {
     gdsl_->Plan(path_);
-    //gdsl_->SplinePath(path_, splinepath_, spline_step_);
+    gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
 void Dsp::publishAllPaths()
 {
   path_pub_.publish(dspPathToRosMsg(path_, false));
-  //splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
+  splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
 }
 
 // transfom paht to ros paht

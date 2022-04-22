@@ -12,7 +12,7 @@
 		<param name="resolution" value="0.5" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="map" />
+		<param name="frame_id" type="string" value="odom" />
 
 		
 		<!-- maximum range to integrate (speedup!) -->
@@ -25,7 +25,8 @@
 
 		<!--param name="pointcloud_[min|max]_z" value="20.0" /-->
 
-		<!--param name="occupancy_[min|max]_z" value="20.0" /-->
+		<param name="occupancy_min_z" value="1.0" />
+		<param name="occupancy_max_z" value="1.5" />
 
 	</node>
                 <!--node pkg="tf" type="static_transform_publisher" name="fake_loc" args="0 0 0 0 0 0 /world /odom 10" /-->

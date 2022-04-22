@@ -29,7 +29,7 @@ Build Dsp `catkin build` from your catkin work space.
 To use DSL with octomap in gazebo set `frame_id` and `cloud_in` to the map frame used and point-cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsp_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsp/path_to_pose.py`.
 The run:
 ```
-rosrun dsp dsp_3d_start.launch
+roslaunch dsp dsp_3d_start.launch
 ```
 and publich the gole pose to `/dsp/set_goal`.
 Observe that the pose has to be inside the map.
@@ -60,3 +60,16 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `odom_topic`: [string] Topic for odom.
 * `odom_frame_id`: [string] Frame to plan in.
 * `unknown_value`: [int] Traversal const for unknown voxels.
+
+# Paper
+Thank you for citing the [$D^*_{+}$ paper](https://arxiv.org/abs/2112.05563),if you use the $D^*_{+}$ paht planner in your work
+```
+@misc{karlsson2021d,
+      title={$D^*_{+}$: A Generic Platform-Agnostic and Risk-Aware Path Planing Framework with an Expandable Grid}, 
+      author={Samuel Karlsson and Anton Koval and Christoforos Kanellakis and Ali-akbar Agha-mohammadi and George Nikolakopoulos},
+      year={2021},
+      eprint={2112.05563},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
+```

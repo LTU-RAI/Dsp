@@ -66,9 +66,11 @@ class Server:
         q_w = self.position_messages.pose.pose.orientation.w
 
 # at wp?
-        if ((x_c - self.x_r) * (x_c - self.x_r)  + (y_c - self.y_r) * (y_c - self.y_r) < WP_SIZE):
+        while ((x_c - self.x_r) * (x_c - self.x_r)  + (y_c - self.y_r) * (y_c - self.y_r) < WP_SIZE):
             if(self.wp_index < len(self.path.poses) -1 ):
                 self.wp_index = self.wp_index + 1
+            else:
+                break
             self.x_r = self.path.poses[self.wp_index].pose.position.x
             self.y_r = self.path.poses[self.wp_index].pose.position.y
             self.z_r = self.path.poses[self.wp_index].pose.position.z

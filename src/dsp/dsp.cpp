@@ -383,6 +383,9 @@ bool Dsp::request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res
     Eigen::Vector3d start_req(req.start.x, req.start.y, req.start.z);
     Eigen::Vector3d goal_req(req.stop.x, req.stop.y, req.stop.z);
 
+    //std::cout<<start_req<<std::endl;
+    //std::cout<<goal_req<<std::endl;
+
     if(!setSG(start_req, goal_req)){
         return false;
     }
@@ -484,6 +487,8 @@ bool Dsp::setSG(Eigen::Vector3d start, Eigen::Vector3d goal){
     Eigen::Vector3d grid_start = posRes(start);
     Eigen::Vector3d grid_goal = posRes(goal);
 
+    //std::cout<<grid_start<<std::endl;
+    //std::cout<<grid_goal<<std::endl;
     if((int) grid_start(0) == (int) grid_goal(0)
         and (int) grid_start(1) == (int) grid_goal(1)
         and (int) grid_start(2) == (int) grid_goal(2))

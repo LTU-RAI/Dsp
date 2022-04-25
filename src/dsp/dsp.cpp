@@ -13,7 +13,7 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
     if (!nh_private_.getParam ("map_topic", map_topic_))
         map_topic_ = "octomap_full";
     if (!nh_private_.getParam ("spline_step_", spline_step_))
-        spline_step_ = .1;
+        spline_step_ = 0.01;
     if (!nh_private_.getParam ("lower_thresh", lower_thresh_))
         lower_thresh_ = 59;
     if (!nh_private_.getParam ("upper_thresh", upper_thresh_))
@@ -469,15 +469,14 @@ Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 void Dsp::planAllPaths()
 {
     gdsl_->Plan(path_);
-    //ROS_INFO("%f",path_.cost);
-    //gdsl_->SplinePath(path_, splinepath_, spline_step_);
+    gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
 void Dsp::publishAllPaths()
 {
   path_pub_.publish(dspPathToRosMsg(path_, false));
-  //splinepath_pub_.publish(dslPathToRosMsg(splinepath_, true)); 
+  splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
 }
 
 // transfom paht to ros paht

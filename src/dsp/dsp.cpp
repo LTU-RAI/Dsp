@@ -63,6 +63,7 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         &Dsp::handleSetGoal, this);
 
 
+    tran = &listener;
 
     start_pos << 0,0,0; 
     goal_pos << 0,0,0; 
@@ -127,6 +128,7 @@ void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
         buildGraph();
     }
     publishOccupancyGrid();
+    setAndPublishPath();
     return;
 }
 
@@ -152,7 +154,7 @@ void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
         grid_built = true;
     }
     publishOccupancyGrid();
-    //setAndPublishPath();
+    setAndPublishPath();
 }
 
 
@@ -367,7 +369,11 @@ void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
 void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
     Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
-    setStart(wpos);
+    //setStart(wpos);
+    //std::cout<<"pos comp"<<std::endl;
+    //std::cout<<wpos<<std::endl;
+    //setTfStart();
+    
 }
 
 
@@ -377,13 +383,31 @@ void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
     setStart(wpos);
 }
 
+void Dsp::setTfStart(){
+    tf::StampedTransform transform;
+    try {
+        tran->lookupTransform(odom_frame_id_, "base_link_shafter", ros::Time(0.0), transform);
+    } catch (tf::TransformException ex){
+        ROS_ERROR("%s", ex.what());
+        return;
+    }
+    Eigen::Vector3d wpos(transform.getOrigin().x(),
+            transform.getOrigin().y(),
+            transform.getOrigin().z());
+    if(!use_3d_)
+        wpos[2] = 0.0;
+    //std::cout<<wpos<<std::endl;
+    setStart(wpos);
+
+}
+
 void Dsp::setStart(Eigen::Vector3d wpos)
 {
     if(!use_3d_){
         wpos[2] = 0;
     }
     start_pos = wpos; 
-    setAndPublishPath();
+    //setAndPublishPath();
 }
 
 void Dsp::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
@@ -405,6 +429,7 @@ void Dsp::setAndPublishPath(){
     if(!grid_built){
         return;
     }
+    setTfStart();
     Eigen::Vector3d grid_start = posRes(start_pos);
     Eigen::Vector3d grid_goal = posRes(goal_pos);
 

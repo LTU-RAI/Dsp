@@ -29,7 +29,7 @@ Build Dsp `catkin build` from your catkin work space.
 To use DSL with octomap in gazebo set `frame_id` and `cloud_in` to the map frame used and point-cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsp_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsp/path_to_pose.py`.
 The run:
 ```
-rosrun dsp dsp_3d_start.launch
+roslaunch dsp dsp_3d_start.launch
 ```
 and publich the gole pose to `/dsp/set_goal`.
 Observe that the pose has to be inside the map.

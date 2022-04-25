@@ -65,6 +65,8 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
     tran = &listener;
 
+    cost_srv_ = nh_.advertiseService("dsp/path_cost", &Dsp::request_cost, this);
+
     start_pos << 0,0,0; 
     goal_pos << 0,0,0; 
 }
@@ -235,7 +237,7 @@ void Dsp::buildGraph(){
     int size = length_voxel * width_voxel * height_voxel;
     grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
         occupancy_map.get(),
-        1, 1, 1, 1, DSP_OCCUPIED + 1));
+        1, 1, 1, 0, DSP_OCCUPIED + 1));
     connectivity_.reset(new dsl::Grid3dConnectivity(*grid_));
     gdsl_.reset(new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true));
     ROS_INFO("Graph built");
@@ -376,6 +378,25 @@ void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
     
 }
 
+bool Dsp::request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res){
+
+    Eigen::Vector3d start_req(req.start.x, req.start.y, req.start.z);
+    Eigen::Vector3d goal_req(req.stop.x, req.stop.y, req.stop.z);
+
+    //std::cout<<start_req<<std::endl;
+    //std::cout<<goal_req<<std::endl;
+
+    if(!setSG(start_req, goal_req)){
+        return false;
+    }
+
+    dsl::GridPath<3> path;
+    gdsl_->Plan(path);
+    res.cost = path.cost;
+
+    return true;
+
+}
 
 void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
@@ -430,9 +451,13 @@ void Dsp::setAndPublishPath(){
         return;
     }
     setTfStart();
-    Eigen::Vector3d grid_start = posRes(start_pos);
-    Eigen::Vector3d grid_goal = posRes(goal_pos);
+    //Eigen::Vector3d grid_start = posRes(start_pos);
+    //Eigen::Vector3d grid_goal = posRes(goal_pos);
 
+    if(!setSG(start_pos, goal_pos)){
+        return;
+    }
+    /*
     if((int) grid_start(0) == (int) grid_goal(0)
         and (int) grid_start(1) == (int) grid_goal(1)
         and (int) grid_start(2) == (int) grid_goal(2))
@@ -450,12 +475,39 @@ void Dsp::setAndPublishPath(){
         ROS_WARN("SetGoal faild");
         return;
     }
+    */
 
     planAllPaths();
     publishAllPaths();
 
 }
 
+bool Dsp::setSG(Eigen::Vector3d start, Eigen::Vector3d goal){
+
+    Eigen::Vector3d grid_start = posRes(start);
+    Eigen::Vector3d grid_goal = posRes(goal);
+
+    //std::cout<<grid_start<<std::endl;
+    //std::cout<<grid_goal<<std::endl;
+    if((int) grid_start(0) == (int) grid_goal(0)
+        and (int) grid_start(1) == (int) grid_goal(1)
+        and (int) grid_start(2) == (int) grid_goal(2))
+    {
+        ROS_WARN("Start and goal poses are the some");
+        return false;
+    }
+    if (!gdsl_->SetStart(grid_start))
+    {
+        ROS_WARN("SetStart faild");
+        return false;
+    }
+    if (!gdsl_->SetGoal(grid_goal))
+    {
+        ROS_WARN("SetGoal faild");
+        return false;
+    }
+    return true;
+}
 // transfomre a pose betewn IRL cordinates and map cordinate 
 Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 {
@@ -512,6 +564,7 @@ nav_msgs::Path Dsp::dspPathToRosMsg(const std::vector<Eigen::Vector3d> &dsp_path
 
   return msg; 
 }
+
 
 // publishing map usedfule when debuging
 void Dsp::publishOccupancyGrid()

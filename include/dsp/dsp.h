@@ -7,6 +7,8 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
 
+#include "dsp/pathCost.h"
+
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 
@@ -49,6 +51,9 @@ private:
     void handleSetStartOdom(const nav_msgs::Odometry msg);
     void setStart(Eigen::Vector3d wpos);        
     void setTfStart();
+
+    bool request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res);
+    bool setSG(Eigen::Vector3d grid_start, Eigen::Vector3d grid_goal);
     
     // set ending point of planing
     void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
@@ -71,6 +76,8 @@ private:
     ros::Subscriber set_goal_sub_;
     ros::Subscriber set_frontier_sub;
     ros::Subscriber get_octomap_sub_;
+
+    ros::ServiceServer cost_srv_;
     
     // dsp variables
     std::shared_ptr<dsl::Grid3d> grid_;

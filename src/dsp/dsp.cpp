@@ -532,10 +532,10 @@ void Dsp::publishOccupancyGrid()
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-                if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
+                //if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) == 1)
-                //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
+                if(gdsl_->GetCost(pos) > 10 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSP_OCCUPIED and gdsl_->GetCost(pos) > DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) >= DSP_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 {

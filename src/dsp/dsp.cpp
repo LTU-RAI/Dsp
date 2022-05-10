@@ -237,7 +237,7 @@ void Dsp::buildGraph(){
     int size = length_voxel * width_voxel * height_voxel;
     grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
         occupancy_map.get(),
-        1, 1, 1, 0, DSP_OCCUPIED + 1));
+        1, 1, 1, 1, DSP_OCCUPIED + 1));
     connectivity_.reset(new dsl::Grid3dConnectivity(*grid_));
     gdsl_.reset(new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true));
     ROS_INFO("Graph built");

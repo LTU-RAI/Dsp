@@ -528,7 +528,11 @@ void Dsp::planAllPaths()
 void Dsp::publishAllPaths()
 {
   path_pub_.publish(dspPathToRosMsg(path_, false));
-  splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
+  if (path_.cells.size() <= 3){
+    splinepath_pub_.publish(dspPathToRosMsg(path_, false)); 
+  } else {
+    splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
+  }
 }
 
 // transfom paht to ros paht

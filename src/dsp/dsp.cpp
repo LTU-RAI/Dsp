@@ -31,6 +31,8 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         odom_frame_id_ = "odom";
     if (!nh_private_.getParam ("unknown_value", DSP_UNKNOWN))
         DSP_UNKNOWN = 10000;
+    if (!nh_private_.getParam ("base_link", base_link_))
+        base_link_ = "base_link";
 
     occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsp/occupancy_map",  0);
     path_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/path",  0);
@@ -407,7 +409,7 @@ void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 void Dsp::setTfStart(){
     tf::StampedTransform transform;
     try {
-        tran->lookupTransform(odom_frame_id_, "base_link_shafter", ros::Time(0.0), transform);
+        tran->lookupTransform(odom_frame_id_, base_link_, ros::Time(0.0), transform);
     } catch (tf::TransformException ex){
         ROS_ERROR("%s", ex.what());
         return;

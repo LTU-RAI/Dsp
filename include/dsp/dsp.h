@@ -95,6 +95,7 @@ private:
     std::string map_topic_;
     std::string odom_topic_;
     std::string odom_frame_id_;
+    std::string base_link_;
     int DSP_UNKNOWN;
     int DSP_OCCUPIED = 2000000000;
     int risk_;

@@ -295,7 +295,7 @@ void Dsp::updateGDSP(std::shared_ptr<octomap::OcTree> tree)
                         {
                             gdsl_->SetCost(p, 1);
                             occupancy_map[idx] = 1;
-                            saftyMarginalFree(pos);
+                            saftyMarginalLoop(pos);
                         }
                     }
                     k++;

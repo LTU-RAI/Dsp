@@ -74,25 +74,38 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 // 2D occupancyGrid callback 
 void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
 
+    pmin(0) = msg->info.origin.position.x;
+    pmin(1) = msg->info.origin.position.y;
+    pmin(2) = 0;
+
     if (length * width == msg->info.width * msg->info.height){
         int size = length_voxel * width_voxel;
         for (int i = 0; i < size; i++){
+            Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
             if(msg->data[i] > upper_thresh_ && occupancy_map[i] != DSP_OCCUPIED){
-                Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
                 saftyMarginal(pos, true);
                 occupancy_map[i] = DSP_OCCUPIED;
                 gdsl_->SetCost(pos, DSP_OCCUPIED);
             }
             else if (msg->data[i] < lower_thresh_ && msg->data[i] != -1 && occupancy_map[i] >= DSP_UNKNOWN){
                 if (occupancy_map[i] == DSP_OCCUPIED){
-                    Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
                     gdsl_->SetCost(pos, 1);
                     occupancy_map[i] = 1;
-                    saftyMarginalFree(pos);
+                    saftyMarginalLoop(pos);
                 } else {
-                    Eigen::Vector3d pos(i % length_voxel, i / length_voxel, 0);
                     gdsl_->SetCost(pos, occupancy_map[i] - DSP_UNKNOWN + 1);
                     occupancy_map[i] = occupancy_map[i] - DSP_UNKNOWN + 1;
+                }
+            }
+            else if (msg->data[i] == -1){
+                if (occupancy_map[i] < DSP_UNKNOWN){
+                    gdsl_->SetCost(pos, occupancy_map[i] + DSP_UNKNOWN);
+                    occupancy_map[i] = occupancy_map[i] + DSP_UNKNOWN;
+                }
+                else if (occupancy_map[i] == DSP_OCCUPIED){
+                    gdsl_->SetCost(pos, DSP_UNKNOWN);
+                    occupancy_map[i] = DSP_UNKNOWN;
+                    saftyMarginalLoop(pos);
                 }
             }
         }
@@ -103,9 +116,6 @@ void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
         length = msg->info.width;
         res_octomap = msg->info.resolution;
         grid_built = true;
-        pmin(0) = msg->info.origin.position.x;
-        pmin(1) = msg->info.origin.position.y;
-        pmin(2) = 0;
 
         length_voxel = length; 
         width_voxel = width; 
@@ -237,7 +247,7 @@ void Dsp::buildGraph(){
     int size = length_voxel * width_voxel * height_voxel;
     grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
         occupancy_map.get(),
-        1, 1, 1, 0, DSP_OCCUPIED + 1));
+        1, 1, 1, 1, DSP_OCCUPIED + 1));
     connectivity_.reset(new dsl::Grid3dConnectivity(*grid_));
     gdsl_.reset(new dsl::GridSearch<3>(*grid_, *connectivity_, cost_, true));
     ROS_INFO("Graph built");
@@ -285,7 +295,7 @@ void Dsp::updateGDSP(std::shared_ptr<octomap::OcTree> tree)
                         {
                             gdsl_->SetCost(p, 1);
                             occupancy_map[idx] = 1;
-                            saftyMarginalFree(pos);
+                            saftyMarginalLoop(pos);
                         }
                     }
                     k++;
@@ -360,11 +370,49 @@ void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
             }
         }
     }
+    int idx = pos(0) + pos(1)*length_voxel + pos(2)*length_voxel*width_voxel;
     if (sum <= risk_ * risk_ * 3){
         int cost = DSP_UNKNOWN / (sum + 2);
-        occupancy_map[index] = cost;
-        gdsl_->SetCost(local_pose, cost);
+        if (occupancy_map[idx] < DSP_UNKNOWN){
+            if(occupancy_map[idx] < cost){
+                occupancy_map[idx] = cost;
+                gdsl_->SetCost(pos, cost);
+            }
+        }
+        else if (occupancy_map[idx] >= DSP_UNKNOWN && occupancy_map[idx] != DSP_OCCUPIED){
+            cost = cost + DSP_UNKNOWN;
+            if (cost > occupancy_map[idx]){
+                occupancy_map[idx] = cost;
+                gdsl_->SetCost(pos, cost);
+            }
+        }
 
+    } else {
+        if (occupancy_map[idx] < DSP_UNKNOWN){
+            gdsl_->SetCost(pos, 1);
+            occupancy_map[idx] = 1;
+        } else {
+            gdsl_->SetCost(pos, DSP_UNKNOWN);
+            occupancy_map[idx] = DSP_UNKNOWN;
+        }
+    }
+}
+
+void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
+    
+    Eigen::Vector3d local_pose;
+    for(int i = -risk_; i <= risk_; i++){
+        for(int j = -risk_; j <= risk_; j++){
+            for(int k = -risk_; k <= risk_; k++){
+                int x = pos(0) + i;
+                int y = pos(1) + j;
+                int z = pos(2) + k;
+                if(x >= 0 && x < length_voxel && y >= 0 && y < width_voxel && z >= 0 && z < height_voxel){
+                    local_pose << pos(0) + i, pos(1) + j, pos(2) + k;
+                    saftyMarginalFree(local_pose);
+                }
+            }
+        }
     }
 }
 
@@ -408,7 +456,7 @@ void Dsp::setTfStart(){
     tf::StampedTransform transform;
     try {
         tran->lookupTransform(odom_frame_id_, "world_shafter", ros::Time(0.0), transform);
-    } catch (tf::TransformException ex){
+    catch (tf::TransformException ex){
         ROS_ERROR("%s", ex.what());
         return;
     }
@@ -528,7 +576,11 @@ void Dsp::planAllPaths()
 void Dsp::publishAllPaths()
 {
   path_pub_.publish(dspPathToRosMsg(path_, false));
-  splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
+  if (path_.cells.size() <= 3){
+    splinepath_pub_.publish(dspPathToRosMsg(path_, false)); 
+  } else {
+    splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
+  }
 }
 
 // transfom paht to ros paht
@@ -587,11 +639,13 @@ void Dsp::publishOccupancyGrid()
                 // Different parts to vizulize
                 //if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSP_UNKNOWN)
-                if(gdsl_->GetCost(pos) == 1)
+                if(gdsl_->GetCost(pos) < 10)
+                //if(gdsl_->GetCost(pos) == 1)
                 //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSP_OCCUPIED and gdsl_->GetCost(pos) > DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) >= DSP_UNKNOWN / 5 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 {
+                    //std::cout<<gdsl_->GetCost(pos)<<std::endl;
                     geometry_msgs::Point pt;
                     //pt.x = (x + pmin(0)) * res_octomap;
                     //pt.y = (y + pmin(1)) * res_octomap;
@@ -613,7 +667,7 @@ void Dsp::publishOccupancyGrid()
     occmap_viz.action = visualization_msgs::Marker::ADD;
     occmap_viz.pose.position.x = 0.5 * res_octomap;// + pmin(0) * res_octomap; 
     occmap_viz.pose.position.y = 0.5 * res_octomap;// + pmin(1) * res_octomap;
-    occmap_viz.pose.position.z = 0.5 * res_octomap;// + pmin(2) * res_octomap;
+    occmap_viz.pose.position.z = 10;//0.5 * res_octomap;// + pmin(2) * res_octomap;
     occmap_viz.pose.orientation.x = 0.0;
     occmap_viz.pose.orientation.y = 0.0;
     occmap_viz.pose.orientation.z = 0.0;

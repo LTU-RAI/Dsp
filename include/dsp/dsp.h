@@ -44,6 +44,7 @@ private:
     void buildGDSP(std::shared_ptr<octomap::OcTree> tree);      
     void saftyMarginal(Eigen::Vector3d pos, bool update);
     void saftyMarginalFree(Eigen::Vector3d pos);
+    void saftyMarginalLoop(Eigen::Vector3d pos);
     void buildGraph();  
     
     // set starting point of planing

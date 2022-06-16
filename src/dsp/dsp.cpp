@@ -407,7 +407,7 @@ void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 void Dsp::setTfStart(){
     tf::StampedTransform transform;
     try {
-        tran->lookupTransform(odom_frame_id_, "base_link_shafter", ros::Time(0.0), transform);
+        tran->lookupTransform(odom_frame_id_, "world_shafter", ros::Time(0.0), transform);
     } catch (tf::TransformException ex){
         ROS_ERROR("%s", ex.what());
         return;

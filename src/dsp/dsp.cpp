@@ -456,7 +456,7 @@ void Dsp::setTfStart(){
     tf::StampedTransform transform;
     try {
         tran->lookupTransform(odom_frame_id_, "world_shafter", ros::Time(0.0), transform);
-    catch (tf::TransformException ex){
+    } catch (tf::TransformException ex){
         ROS_ERROR("%s", ex.what());
         return;
     }

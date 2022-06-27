@@ -29,6 +29,8 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         odom_topic_ = "pixy/truth/NWU";
     if (!nh_private_.getParam ("odom_frame_id", odom_frame_id_))
         odom_frame_id_ = "odom";
+    if (!nh_private_.getParam ("base_link_frame", base_link_frame_))
+        base_link_frame_ = "base_link";
     if (!nh_private_.getParam ("unknown_value", DSP_UNKNOWN))
         DSP_UNKNOWN = 10000;
 
@@ -455,7 +457,7 @@ void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 void Dsp::setTfStart(){
     tf::StampedTransform transform;
     try {
-        tran->lookupTransform(odom_frame_id_, "world_shafter", ros::Time(0.0), transform);
+        tran->lookupTransform(odom_frame_id_, base_link_frame_, ros::Time(0.0), transform);
     } catch (tf::TransformException ex){
         ROS_ERROR("%s", ex.what());
         return;

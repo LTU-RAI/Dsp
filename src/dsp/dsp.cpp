@@ -33,8 +33,6 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         base_link_frame_ = "base_link";
     if (!nh_private_.getParam ("unknown_value", DSP_UNKNOWN))
         DSP_UNKNOWN = 10000;
-    if (!nh_private_.getParam ("base_link", base_link_))
-        base_link_ = "base_link";
 
     occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsp/occupancy_map",  0);
     path_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/path",  0);

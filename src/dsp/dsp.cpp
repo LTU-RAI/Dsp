@@ -410,7 +410,7 @@ void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
                 int y = pos(1) + j;
                 int z = pos(2) + k;
                 if(x >= 0 && x < length_voxel && y >= 0 && y < width_voxel && z >= 0 && z < height_voxel){
-                    local_pose << pos(0) + i, pos(1) + j, pos(2) + k;
+                    local_pose << x, y, z;
                     saftyMarginalFree(local_pose);
                 }
             }
@@ -421,10 +421,6 @@ void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
 void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
     Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
-    //setStart(wpos);
-    //std::cout<<"pos comp"<<std::endl;
-    //std::cout<<wpos<<std::endl;
-    //setTfStart();
     
 }
 
@@ -639,9 +635,9 @@ void Dsp::publishOccupancyGrid()
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-                //if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
+                if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSP_UNKNOWN)
-                if(gdsl_->GetCost(pos) < 10)
+                //if(gdsl_->GetCost(pos) < 10)
                 //if(gdsl_->GetCost(pos) == 1)
                 //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSP_OCCUPIED and gdsl_->GetCost(pos) > DSP_UNKNOWN)
@@ -669,7 +665,7 @@ void Dsp::publishOccupancyGrid()
     occmap_viz.action = visualization_msgs::Marker::ADD;
     occmap_viz.pose.position.x = 0.5 * res_octomap;// + pmin(0) * res_octomap; 
     occmap_viz.pose.position.y = 0.5 * res_octomap;// + pmin(1) * res_octomap;
-    occmap_viz.pose.position.z = 10;//0.5 * res_octomap;// + pmin(2) * res_octomap;
+    occmap_viz.pose.position.z = 0.5 * res_octomap;// + pmin(2) * res_octomap;
     occmap_viz.pose.orientation.x = 0.0;
     occmap_viz.pose.orientation.y = 0.0;
     occmap_viz.pose.orientation.z = 0.0;

@@ -3,7 +3,7 @@
 	<node name="dsp" pkg="dsp" type="dsp_node" output="screen">
 		<param name="use_gazebo_odom" type="bool" value="true"/>
 		<param name="odom_topic" type="String" value="/odometry/imu"/>
-		<param name="odom_frame_id" type="String" value="world_shafter"/>
+		<param name="odom_frame_id" type="String" value="world"/>
 		<param name="spline_step_" type="double" value="0.166"/>
                 <!--param name="odom_topic" type="String" value="/pixy/truth/NWU"/-->
 		<!--param name="odom_frame_id" type="String" value="world"/-->

@@ -433,7 +433,7 @@ void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
                 int y = pos(1) + j;
                 int z = pos(2) + k;
                 if(x >= 0 && x < length_voxel && y >= 0 && y < width_voxel && z >= 0 && z < height_voxel){
-                    local_pose << pos(0) + i, pos(1) + j, pos(2) + k;
+                    local_pose << x, y, z;
                     saftyMarginalFree(local_pose);
                 }
             }
@@ -447,10 +447,6 @@ void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
 	std::cout<<"5"<<std::endl;
     Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
-    //setStart(wpos);
-    //std::cout<<"pos comp"<<std::endl;
-    //std::cout<<wpos<<std::endl;
-    //setTfStart();
     
 }
 

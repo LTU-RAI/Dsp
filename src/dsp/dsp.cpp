@@ -148,6 +148,7 @@ void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
 
 // octomap 3D callback
 void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
+	std::cout<<"-1"<<std::endl;
     std::shared_ptr<octomap::OcTree> tree(dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg)));
     res_octomap = tree->getResolution();
     double length_test, width_test, height_test;
@@ -174,11 +175,13 @@ void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
 
 void Dsp::buildGDSP(std::shared_ptr<octomap::OcTree> tree)
 {
+	std::cout<<"0"<<std::endl;
     length_voxel = round(length/res_octomap);
     width_voxel = round(width/res_octomap);
     height_voxel = round(height/res_octomap);
 
     int size = length_voxel * width_voxel * height_voxel;
+    std::cout<<"size "<<size<<std::endl;
     occupancy_map.reset(new double[size]);
 
    for(int i = 0; i < size; i++)
@@ -257,6 +260,7 @@ void Dsp::buildGraph(){
 
 void Dsp::updateGDSP(std::shared_ptr<octomap::OcTree> tree)
 {
+	std::cout<<"1"<<std::endl;
     for(octomap::OcTree::leaf_iterator it = tree->begin_leafs(), end = tree->end_leafs(); it != end; ++it)
     {
         Eigen::Vector3d pos(it.getX(), it.getY(), it.getZ());
@@ -313,6 +317,7 @@ void Dsp::updateGDSP(std::shared_ptr<octomap::OcTree> tree)
 // adding of safty margianl to occupied space inprove safty
 void Dsp::saftyMarginal(Eigen::Vector3d pos, bool update)
 {
+	std::cout<<"2"<<std::endl;
     Eigen::Vector3d local_pose;
     for(int i = -risk_; i <= risk_; i++){
         for(int j = -risk_; j <= risk_; j++){
@@ -350,6 +355,7 @@ void Dsp::saftyMarginal(Eigen::Vector3d pos, bool update)
 // adding safty marginal to cells descoverd free
 void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
 {
+	std::cout<<"3"<<std::endl;
     int sum = risk_ * risk_ * 3 + 1;
     int index;
     Eigen::Vector3d local_pose;
@@ -361,6 +367,8 @@ void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
                 int z = pos(2) + k;
                 if(x >= 0 && x < length_voxel && y >= 0 && y < width_voxel && z >= 0 && z < height_voxel){
 	            int idx = x + y*length_voxel + z*length_voxel*width_voxel;
+    	std::cout<<"size: "<<length_voxel * width_voxel * height_voxel<<std::endl;
+	std::cout<<"idx: "<<idx<<std::endl;
                     if (occupancy_map[idx] == DSP_OCCUPIED){
                         if (i * i + j * j + k * k < sum){
                             sum = i * i + j * j + k * k;
@@ -372,35 +380,50 @@ void Dsp::saftyMarginalFree(Eigen::Vector3d pos)
             }
         }
     }
+	//std::cout<<"3 1"<<std::endl;
     int idx = pos(0) + pos(1)*length_voxel + pos(2)*length_voxel*width_voxel;
+    if (idx < 0 or idx > (length_voxel * width_voxel * height_voxel)){
+	//return;
+    }
     if (sum <= risk_ * risk_ * 3){
+	//std::cout<<"3 1 1"<<std::endl;
         int cost = DSP_UNKNOWN / (sum + 2);
-        if (occupancy_map[idx] < DSP_UNKNOWN){
-            if(occupancy_map[idx] < cost){
-                occupancy_map[idx] = cost;
+	//std::cout<<"3 1 2"<<std::endl;
+    	std::cout<<"size: "<<length_voxel * width_voxel * height_voxel<<std::endl;
+	std::cout<<"index: "<<index<<std::endl;
+        if (occupancy_map[index] < DSP_UNKNOWN){
+	std::cout<<"3 1 3"<<std::endl;
+            if(occupancy_map[index] < cost){
+	//std::cout<<"3 1 4"<<std::endl;
+                occupancy_map[index] = cost;
                 gdsl_->SetCost(pos, cost);
             }
         }
-        else if (occupancy_map[idx] >= DSP_UNKNOWN && occupancy_map[idx] != DSP_OCCUPIED){
+        else if (occupancy_map[index] >= DSP_UNKNOWN && occupancy_map[index] != DSP_OCCUPIED){
+	std::cout<<"3 1 4"<<std::endl;
             cost = cost + DSP_UNKNOWN;
-            if (cost > occupancy_map[idx]){
-                occupancy_map[idx] = cost;
+            if (cost > occupancy_map[index]){
+	std::cout<<"3 1 5"<<std::endl;
+                occupancy_map[index] = cost;
                 gdsl_->SetCost(pos, cost);
             }
         }
+	std::cout<<"3 2"<<std::endl;
 
     } else {
-        if (occupancy_map[idx] < DSP_UNKNOWN){
+        if (occupancy_map[index] < DSP_UNKNOWN){
             gdsl_->SetCost(pos, 1);
-            occupancy_map[idx] = 1;
+            occupancy_map[index] = 1;
         } else {
             gdsl_->SetCost(pos, DSP_UNKNOWN);
-            occupancy_map[idx] = DSP_UNKNOWN;
+            occupancy_map[index] = DSP_UNKNOWN;
         }
     }
+	std::cout<<"3 end"<<std::endl;
 }
 
 void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
+	std::cout<<"4"<<std::endl;
     
     Eigen::Vector3d local_pose;
     for(int i = -risk_; i <= risk_; i++){
@@ -416,10 +439,13 @@ void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
             }
         }
     }
+	std::cout<<"4 end"<<std::endl;
+    
 }
 
 void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 {
+	std::cout<<"5"<<std::endl;
     Eigen::Vector3d wpos(msg.pose.pose.position.x , msg.pose.pose.position.y, msg.pose.pose.position.z);
     //setStart(wpos);
     //std::cout<<"pos comp"<<std::endl;
@@ -429,6 +455,7 @@ void Dsp::handleSetStartOdom(const nav_msgs::Odometry msg)
 }
 
 bool Dsp::request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res){
+	std::cout<<"6"<<std::endl;
 
     Eigen::Vector3d start_req(req.start.x, req.start.y, req.start.z);
     Eigen::Vector3d goal_req(req.stop.x, req.stop.y, req.stop.z);
@@ -450,11 +477,13 @@ bool Dsp::request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res
 
 void Dsp::handleSetStart(const geometry_msgs::PointConstPtr& msg)
 {
+	std::cout<<"7"<<std::endl;
     Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
     setStart(wpos);
 }
 
 void Dsp::setTfStart(){
+	std::cout<<"8"<<std::endl;
     tf::StampedTransform transform;
     try {
         tran->lookupTransform(odom_frame_id_, base_link_frame_, ros::Time(0.0), transform);
@@ -474,6 +503,7 @@ void Dsp::setTfStart(){
 
 void Dsp::setStart(Eigen::Vector3d wpos)
 {
+	std::cout<<"9"<<std::endl;
     if(!use_3d_){
         wpos[2] = 0;
     }
@@ -483,12 +513,14 @@ void Dsp::setStart(Eigen::Vector3d wpos)
 
 void Dsp::handleSetGoal(const geometry_msgs::PointConstPtr& msg)
 {
+	std::cout<<"10"<<std::endl;
     Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
     setGoal(wpos);
 }
 
 void Dsp::setGoal(Eigen::Vector3d wpos)
 {
+	std::cout<<"11"<<std::endl;
     if(!use_3d_){
         wpos[2] = 0;
     }
@@ -497,6 +529,7 @@ void Dsp::setGoal(Eigen::Vector3d wpos)
 }
 
 void Dsp::setAndPublishPath(){
+	std::cout<<"12"<<std::endl;
     if(!grid_built){
         return;
     }
@@ -529,10 +562,12 @@ void Dsp::setAndPublishPath(){
 
     planAllPaths();
     publishAllPaths();
+	std::cout<<"12 end"<<std::endl;
 
 }
 
 bool Dsp::setSG(Eigen::Vector3d start, Eigen::Vector3d goal){
+	std::cout<<"13"<<std::endl;
 
     Eigen::Vector3d grid_start = posRes(start);
     Eigen::Vector3d grid_goal = posRes(goal);
@@ -561,33 +596,38 @@ bool Dsp::setSG(Eigen::Vector3d start, Eigen::Vector3d goal){
 // transfomre a pose betewn IRL cordinates and map cordinate 
 Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 {
+	std::cout<<"14"<<std::endl;
     for (int i = 0; i < 3; i++)
     {
         wpos(i) = (wpos(i) - pmin(i)) / res_octomap;
     }
+	std::cout<<"14 end"<<std::endl;
     return wpos;
 }
 
 void Dsp::planAllPaths()
 {
+	std::cout<<"15"<<std::endl;
     gdsl_->Plan(path_);
-    gdsl_->SplinePath(path_, splinepath_, spline_step_);
+    //gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
 void Dsp::publishAllPaths()
 {
+	std::cout<<"16"<<std::endl;
   path_pub_.publish(dspPathToRosMsg(path_, false));
-  if (path_.cells.size() <= 3){
-    splinepath_pub_.publish(dspPathToRosMsg(path_, false)); 
-  } else {
-    splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
-  }
+  //if (path_.cells.size() <= 3){
+  //  splinepath_pub_.publish(dspPathToRosMsg(path_, false)); 
+  //} else {
+  //  splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
+  //}
 }
 
 // transfom paht to ros paht
 nav_msgs::Path Dsp::dspPathToRosMsg(const dsl::GridPath<3> &dsp_path, bool isSplined)
 {
+	std::cout<<"17"<<std::endl;
   std::vector<Eigen::Vector3d> path;
   for(int i = 0; i < dsp_path.cells.size(); i++)
   {
@@ -623,6 +663,7 @@ nav_msgs::Path Dsp::dspPathToRosMsg(const std::vector<Eigen::Vector3d> &dsp_path
 // publishing map usedfule when debuging
 void Dsp::publishOccupancyGrid()
 {
+	std::cout<<"20"<<std::endl;
     visualization_msgs::Marker occmap_viz;
 
     std::vector<geometry_msgs::Point> marker_pos;
@@ -639,9 +680,9 @@ void Dsp::publishOccupancyGrid()
                 int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
-                //if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
+                if(gdsl_->GetCost(pos) == DSP_OCCUPIED)
                 //if(gdsl_->GetCost(pos) == DSP_UNKNOWN)
-                if(gdsl_->GetCost(pos) < 10)
+                //if(gdsl_->GetCost(pos) < 10)
                 //if(gdsl_->GetCost(pos) == 1)
                 //if(gdsl_->GetCost(pos) > 1 and gdsl_->GetCost(pos) < DSP_UNKNOWN)
                 //if(gdsl_->GetCost(pos) < DSP_OCCUPIED and gdsl_->GetCost(pos) > DSP_UNKNOWN)
@@ -669,7 +710,7 @@ void Dsp::publishOccupancyGrid()
     occmap_viz.action = visualization_msgs::Marker::ADD;
     occmap_viz.pose.position.x = 0.5 * res_octomap;// + pmin(0) * res_octomap; 
     occmap_viz.pose.position.y = 0.5 * res_octomap;// + pmin(1) * res_octomap;
-    occmap_viz.pose.position.z = 10;//0.5 * res_octomap;// + pmin(2) * res_octomap;
+    occmap_viz.pose.position.z = 0.5 * res_octomap;// + pmin(2) * res_octomap;
     occmap_viz.pose.orientation.x = 0.0;
     occmap_viz.pose.orientation.y = 0.0;
     occmap_viz.pose.orientation.z = 0.0;
@@ -684,6 +725,7 @@ void Dsp::publishOccupancyGrid()
     occmap_viz.points = marker_pos;
     occ_map_viz_pub_.publish(occmap_viz);
 
+	std::cout<<"20 end"<<std::endl;
 }
 
 } // namespace

@@ -10,5 +10,6 @@
   rosrun octomap_server octomap_server_node "forest0.bt"
 -->
 <launch>
-  		<node pkg="octomap_server" type="octomap_server_static" name="octomap_server" args="$(find forest_gen)/octomaps/forest0.bt" output="screen"/>
+    <node pkg="octomap_server" type="octomap_server_static" name="octomap_server" args="/home/grammers/catkin_ws/test.ot" output="screen"/>
+  		<!--node pkg="octomap_server" type="octomap_server_static" name="octomap_server" args="$(find forest_gen)/octomaps/forest0.bt" output="screen"/-->
 </launch>

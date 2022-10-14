@@ -19,6 +19,7 @@
 		<param name="sensor_model/max_range" value="15.0" />
 		
 		<!-- data source to integrate (PointCloud2) -->
+                <!--remap from="cloud_in" to="/os_cloud_node/points" /-->
 		<remap from="cloud_in" to="/velodyne_points" />
 
                 <param name="publish_free_space" value="true"/>

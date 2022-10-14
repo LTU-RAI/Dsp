@@ -7,6 +7,8 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
 
+#include "dsp/pathCost.h"
+
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 
@@ -42,6 +44,7 @@ private:
     void buildGDSP(std::shared_ptr<octomap::OcTree> tree);      
     void saftyMarginal(Eigen::Vector3d pos, bool update);
     void saftyMarginalFree(Eigen::Vector3d pos);
+    void saftyMarginalLoop(Eigen::Vector3d pos);
     void buildGraph();  
     
     // set starting point of planing
@@ -49,6 +52,9 @@ private:
     void handleSetStartOdom(const nav_msgs::Odometry msg);
     void setStart(Eigen::Vector3d wpos);        
     void setTfStart();
+
+    bool request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res);
+    bool setSG(Eigen::Vector3d grid_start, Eigen::Vector3d grid_goal);
     
     // set ending point of planing
     void handleSetGoal(const geometry_msgs::PointConstPtr& msg);
@@ -71,6 +77,8 @@ private:
     ros::Subscriber set_goal_sub_;
     ros::Subscriber set_frontier_sub;
     ros::Subscriber get_octomap_sub_;
+
+    ros::ServiceServer cost_srv_;
     
     // dsp variables
     std::shared_ptr<dsl::Grid3d> grid_;
@@ -88,6 +96,7 @@ private:
     std::string map_topic_;
     std::string odom_topic_;
     std::string odom_frame_id_;
+    std::string base_link_frame_;
     int DSP_UNKNOWN;
     int DSP_OCCUPIED = 2000000000;
     int risk_;

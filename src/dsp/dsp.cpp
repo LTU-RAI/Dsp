@@ -33,6 +33,8 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
         base_link_frame_ = "base_link";
     if (!nh_private_.getParam ("unknown_value", DSP_UNKNOWN))
         DSP_UNKNOWN = 10000;
+    if (!nh_private_.getParam ("update_rate", RATE))
+        RATE = 1;
 
     occ_map_viz_pub_ = nh_.advertise<visualization_msgs::Marker>( "dsp/occupancy_map",  0);
     path_pub_ = nh_.advertise<nav_msgs::Path>( "dsp/path",  0);
@@ -63,6 +65,9 @@ Dsp::Dsp(ros::NodeHandle nh, ros::NodeHandle nh_private) :
 
     set_goal_sub_ = nh_.subscribe<geometry_msgs::Point>("dsp/set_goal", 1,
         &Dsp::handleSetGoal, this);
+
+    if(RATE > 0.0)
+        path_update_timer = nh_.createTimer(ros::Duration(RATE), &Dsp::pathUpdateCallback, this);
 
 
     tran = &listener;
@@ -142,7 +147,7 @@ void Dsp::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr& msg){
         buildGraph();
     }
     //publishOccupancyGrid();
-    setAndPublishPath();
+    //setAndPublishPath();
     return;
 }
 
@@ -169,7 +174,7 @@ void Dsp::octomap_data_callback(const octomap_msgs::OctomapConstPtr& msg) {
         grid_built = true;
     }
     //publishOccupancyGrid();
-    setAndPublishPath();
+    //setAndPublishPath();
 }
 
 
@@ -581,6 +586,10 @@ Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
         wpos(i) = (wpos(i) - pmin(i)) / res_octomap;
     }
     return wpos;
+}
+
+void Dsp::pathUpdateCallback(const ros::TimerEvent& event){
+    setAndPublishPath();
 }
 
 void Dsp::planAllPaths()

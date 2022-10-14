@@ -64,6 +64,9 @@ private:
     void planAllPaths();
     nav_msgs::Path dspPathToRosMsg(const dsl::GridPath<3>& dsp_path, bool isSplined);
     nav_msgs::Path dspPathToRosMsg(const std::vector<Eigen::Vector3d>& dsp_path, bool isSplined);       
+    // Path update
+    void pathUpdateCallback(const ros::TimerEvent& event);
+
     void publishOccupancyGrid();
     Eigen::Vector3d posRes(Eigen::Vector3d wpos);               
     
@@ -77,6 +80,7 @@ private:
     ros::Subscriber set_goal_sub_;
     ros::Subscriber set_frontier_sub;
     ros::Subscriber get_octomap_sub_;
+    ros::Timer path_update_timer;
 
     ros::ServiceServer cost_srv_;
     
@@ -99,6 +103,7 @@ private:
     std::string base_link_frame_;
     int DSP_UNKNOWN;
     int DSP_OCCUPIED = 2000000000;
+    double RATE;
     int risk_;
     int lower_thresh_;
     int upper_thresh_;

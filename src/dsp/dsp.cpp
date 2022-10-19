@@ -458,6 +458,8 @@ bool Dsp::request_cost(dsp::pathCost::Request &req, dsp::pathCost::Response &res
     dsl::GridPath<3> path;
     gdsl_->Plan(path);
     res.cost = path.cost;
+    nav_msgs::Path ros_path = dspPathToRosMsg(path,false);
+    res.path = ros_path;
 
     return true;
 

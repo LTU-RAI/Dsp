@@ -80,6 +80,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   geometry_msgs
+  nav_msgs
   std_msgs
 )
 

@@ -2,4 +2,5 @@ geometry_msgs/Point start
 geometry_msgs/Point stop
 ---
 float64 cost
+float64 distance
 nav_msgs/Path path

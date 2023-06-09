@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <Eigen/Dense>
+#include <cmath>
 
 namespace dsp
 {
@@ -55,6 +56,8 @@ private:
     void setTfStart();
 
     void request_cost(const std::shared_ptr<dsp_interfaces::srv::PathCost::Request> req, std::shared_ptr<dsp_interfaces::srv::PathCost::Response> res);
+    float path_distance(const nav_msgs::msg::Path path);
+    float point_distance(geometry_msgs::msg::Point p0, geometry_msgs::msg::Point p1);
     bool setSG(Eigen::Vector3d grid_start, Eigen::Vector3d grid_goal);
     
     // set ending point of planing

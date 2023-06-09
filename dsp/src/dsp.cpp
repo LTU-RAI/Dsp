@@ -460,9 +460,25 @@ void Dsp::request_cost(const std::shared_ptr<dsp_interfaces::srv::PathCost::Requ
     res->cost = path.cost;
     nav_msgs::msg::Path ros_path = dspPathToRosMsg(path,false);
     res->path = ros_path;
+    res->distance = path_distance(ros_path);
 
     return;
 
+}
+
+float Dsp::path_distance(const nav_msgs::msg::Path path)
+{
+    float distance = 0.0;
+    for(int i = 0; i + 1 < path.poses.size(); i++)
+    {
+        distance += point_distance(path.poses[i].pose.position, path.poses[i+1].pose.position);
+    }
+    return distance;
+}
+
+float Dsp::point_distance( geometry_msgs::msg::Point p0,  geometry_msgs::msg::Point p1)
+{
+    return sqrt(pow(p0.x - p1.x, 2) + pow(p0.y - p1.y, 2) + pow(p0.z - p1.z, 2));
 }
 
 void Dsp::handleSetStart(const geometry_msgs::msg::Point::SharedPtr msg)

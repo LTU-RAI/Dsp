@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <include file="$(find dsp)/launch/octomap_gazebo.launch"/>
-    <include file="$(find dsp)/launch/dsp_grid3d_gazebo.launch"/>
-    <node name="path_to_pose" pkg="dsp" type="path_to_pose.py" output="screen" />
-</launch>

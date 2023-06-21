@@ -490,7 +490,7 @@ void Dsp::handleSetStart(const geometry_msgs::msg::Point::SharedPtr msg)
 
 void Dsp::setTfStart(){
     std::string odf = this->get_parameter("odom_frame_id").get_parameter_value().get<std::string>();
-    std::string blf = this->get_parameter("base_link_frame").get_parameter_value().get<std::string>();
+    std::string blf = this->get_parameter("base_link_frame_id").get_parameter_value().get<std::string>();
     geometry_msgs::msg::TransformStamped t;
     try{
         t = tf_buffer->lookupTransform(

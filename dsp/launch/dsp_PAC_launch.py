@@ -5,7 +5,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='dsp',
-            namespace='shafterX',
+            namespace='shafter2',
             executable='dsp',
             name='dsp'
         )

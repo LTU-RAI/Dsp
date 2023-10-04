@@ -4,14 +4,16 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
+import os
 
+name = os.getlogin()
 
 def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('input_cloud_topic', default_value='ouster/points'),
         DeclareLaunchArgument('resolution', default_value='0.5'),
-        DeclareLaunchArgument('frame_id', default_value='shafter2/world'),
-        DeclareLaunchArgument('base_frame_id', default_value='shafter2/os_sensor'),
+        DeclareLaunchArgument('frame_id', default_value=name + '/world'),
+        DeclareLaunchArgument('base_frame_id', default_value=name + '/os_sensor'),
         DeclareLaunchArgument('height_map', default_value='True'),
         DeclareLaunchArgument('colored_map', default_value='True'),
         DeclareLaunchArgument('color_factor', default_value='0.8'),
@@ -38,7 +40,7 @@ def generate_launch_description():
         DeclareLaunchArgument('publish_free_space', default_value='False'),
         Node(
             package='octomap_server',
-            namespace='shafter2',
+            namespace=name,
             executable='octomap_server_node',
             output='screen',
             remappings=[('cloud_in', LaunchConfiguration('input_cloud_topic'))],

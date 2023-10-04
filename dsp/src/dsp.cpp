@@ -15,7 +15,7 @@ Dsp::Dsp() : Node("dsp")
     this->declare_parameter("use_odometry", false);
     this->declare_parameter("use_3d", true);
     this->declare_parameter("odom_topic", "odometry/imu");
-    this->declare_parameter("odom_frame_id", "odom");
+    this->declare_parameter("odom_frame_id", "map");
     this->declare_parameter("base_link_frame_id", "base_link");
     this->declare_parameter("DSP_UNKNOWN", 10000);
     this->declare_parameter("update_rate", 1);
@@ -36,7 +36,7 @@ Dsp::Dsp() : Node("dsp")
     }
     else
     {
-        set_start_sub_ = this->create_subscription<geometry_msgs::msg::Point>("dsp/set_strart", 1,
+        set_start_sub_ = this->create_subscription<geometry_msgs::msg::Point>("dsp/set_start", 1,
             std::bind(&Dsp::handleSetStart, this, std::placeholders::_1));
     }
 
@@ -249,7 +249,6 @@ void Dsp::buildGDSP(std::shared_ptr<octomap::OcTree> tree)
 }
 
 void Dsp::buildGraph(){
-    std::cout<<"3"<<std::endl;
     RCLCPP_INFO(this->get_logger(), "Building search graph...");
     int size = length_voxel * width_voxel * height_voxel;
     grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
@@ -437,7 +436,6 @@ void Dsp::saftyMarginalLoop(Eigen::Vector3d pos){
 
 void Dsp::handleSetStartOdom(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
-    std::cout<<"8"<<std::endl;
     Eigen::Vector3d wpos(msg->pose.pose.position.x , msg->pose.pose.position.y, msg->pose.pose.position.z);
     //setStart(wpos);
     //setAndPublishPath();
@@ -483,7 +481,6 @@ float Dsp::point_distance( geometry_msgs::msg::Point p0,  geometry_msgs::msg::Po
 
 void Dsp::handleSetStart(const geometry_msgs::msg::Point::SharedPtr msg)
 {
-    std::cout<<"10"<<std::endl;
     Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
     setStart(wpos);
 }
@@ -521,14 +518,12 @@ void Dsp::setStart(Eigen::Vector3d wpos)
 
 void Dsp::handleSetGoal(const geometry_msgs::msg::Point::SharedPtr msg)
 {
-    std::cout<<"13"<<std::endl;
     Eigen::Vector3d wpos(msg->x, msg->y, msg->z);
     setGoal(wpos);
 }
 
 void Dsp::setGoal(Eigen::Vector3d wpos)
 {
-    std::cout<<"14"<<std::endl;
     if(!this->get_parameter("use_3d").get_parameter_value().get<bool>()){
         wpos[2] = 0;
     }
@@ -537,7 +532,6 @@ void Dsp::setGoal(Eigen::Vector3d wpos)
 }
 
 void Dsp::setAndPublishPath(){
-    std::cout<<"15"<<std::endl;
     if(!grid_built){
         return;
     }
@@ -574,7 +568,6 @@ void Dsp::setAndPublishPath(){
 }
 
 bool Dsp::setSG(Eigen::Vector3d start, Eigen::Vector3d goal){
-    std::cout<<"16"<<std::endl;
 
     Eigen::Vector3d grid_start = posRes(start);
     Eigen::Vector3d grid_goal = posRes(goal);
@@ -601,7 +594,6 @@ bool Dsp::setSG(Eigen::Vector3d start, Eigen::Vector3d goal){
 // transfomre a pose betewn IRL cordinates and map cordinate 
 Eigen::Vector3d Dsp::posRes(Eigen::Vector3d wpos)
 {
-    std::cout<<"17"<<std::endl;
     for (int i = 0; i < 3; i++)
     {
         wpos(i) = (wpos(i) - pmin(i)) / res_octomap;
@@ -615,7 +607,6 @@ void Dsp::pathUpdateCallback(){
 
 void Dsp::planAllPaths()
 {
-    std::cout<<"18"<<std::endl;
     gdsl_->Plan(path_);
     //gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
@@ -623,7 +614,6 @@ void Dsp::planAllPaths()
 
 void Dsp::publishAllPaths()
 {
-    std::cout<<"19"<<std::endl;
   path_pub_->publish(dspPathToRosMsg(path_, false));
   //if (path_.cells.size() <= 3){
   //  splinepath_pub_.publish(dspPathToRosMsg(path_, false)); 
@@ -635,7 +625,6 @@ void Dsp::publishAllPaths()
 // transfom paht to ros paht
 nav_msgs::msg::Path Dsp::dspPathToRosMsg(const dsl::GridPath<3> &dsp_path, bool isSplined)
 {
-    std::cout<<"20"<<std::endl;
   std::vector<Eigen::Vector3d> path;
   for(int i = 0; i < dsp_path.cells.size(); i++)
   {

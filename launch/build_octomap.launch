@@ -8,8 +8,8 @@
   www.ros.org/wiki/octomap_server for details  
 -->
 
-<arg name="name" default="shafter4"/>
 <launch>
+    <arg name="name" default="shafter4"/>
 	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server" ns="$(arg name)">
 		<param name="resolution" value="0.3" />
 		

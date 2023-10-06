@@ -12,7 +12,7 @@ Install the dsl library
     git checkout 61cf588668309e87de209cd95f03a0f792a16c33
     mkdir build
     cd build
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
     sudo make install
 ```
 We tested DSP on Ubuntu 18.04 and 20.04 thuse ROS melodic and noetic.

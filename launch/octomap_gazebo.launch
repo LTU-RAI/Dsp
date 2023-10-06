@@ -9,17 +9,19 @@
 -->
 <launch>
 	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-		<param name="resolution" value="0.4" />
+		<param name="resolution" value="0.7" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="world_shafter" />
+		<param name="frame_id" type="string" value="odom" />
 
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="15.0" />
+		<param name="sensor_model/max_range" value="12.0" />
+		<param name="sensor_model/min_range" value="0.5" />
 		
 		<!-- data source to integrate (PointCloud2) -->
-		<remap from="cloud_in" to="/velodyne_points" />
+                <remap from="cloud_in" to="/os_cloud_node/points" />
+		<!--remap from="cloud_in" to="/velodyne_points" /-->
 
                 <param name="publish_free_space" value="true"/>
 

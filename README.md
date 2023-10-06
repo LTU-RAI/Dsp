@@ -60,9 +60,11 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `odom_topic`: [string] Topic for odom.
 * `odom_frame_id`: [string] Frame to plan in.
 * `unknown_value`: [int] Traversal const for unknown voxels.
+* `update_rate`: [int] Path update time in secunds.
+
 
 # Paper
-Thank you for citing the [$D^*_{+}$ paper](https://arxiv.org/abs/2112.05563),if you use the $D^*_{+}$ paht planner in your work
+Thank you for citing the [$D^*_{+}$ paper]([https://arxiv.org/abs/2112.05563](https://www.sciencedirect.com/science/article/pii/S0957417422024277)),if you use the $D^*_{+}$ paht planner in your work
 ```
 @article{karlsson2022d+,
   title={D+∗: A risk aware platform agnostic heterogeneous path planner},

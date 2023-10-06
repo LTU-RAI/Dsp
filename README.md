@@ -64,12 +64,13 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 # Paper
 Thank you for citing the [$D^*_{+}$ paper](https://arxiv.org/abs/2112.05563),if you use the $D^*_{+}$ paht planner in your work
 ```
-@misc{karlsson2021d,
-      title={$D^*_{+}$: A Generic Platform-Agnostic and Risk-Aware Path Planing Framework with an Expandable Grid}, 
-      author={Samuel Karlsson and Anton Koval and Christoforos Kanellakis and Ali-akbar Agha-mohammadi and George Nikolakopoulos},
-      year={2021},
-      eprint={2112.05563},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO}
+@article{karlsson2022d+,
+  title={D+∗: A risk aware platform agnostic heterogeneous path planner},
+  author={Karlsson, Samuel and Koval, Anton and Kanellakis, Christoforos and Nikolakopoulos, George},
+  journal={Expert systems with applications},
+  pages={119408},
+  year={2022},
+  publisher={Elsevier}
 }
+
 ```

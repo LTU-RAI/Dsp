@@ -5,7 +5,7 @@
 		<param name="use_gazebo_odom" type="bool" value="true"/>
 		<param name="odom_topic" type="String" value="localization"/>
 		<param name="odom_frame_id" type="String" value="map"/>
-		<param name="base_link_frame" type="String" value="$(arg name)/base_link"/>
+		<param name="base_link_frame" type="String" value="$(arg name)/body"/>
 		<param name="spline_step_" type="double" value="0.166"/>
 		<param name="update_rate" type="double" value="5.0"/>
 		<!--param name="odom_frame_id" type="String" value="world"/-->

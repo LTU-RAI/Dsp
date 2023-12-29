@@ -10,9 +10,10 @@ name = os.getlogin()
 
 def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument('input_cloud_topic', default_value='ouster/points'),
+        DeclareLaunchArgument('map_path', default_value='/home/r0006e/colcon_ws/src/R0006E-Robotics-for-all-behavior-tree/maps/octomap_robotics.ot'),
+        DeclareLaunchArgument('input_cloud_topic', default_value='/os_cloud_node/points'),
         DeclareLaunchArgument('resolution', default_value='0.5'),
-        DeclareLaunchArgument('frame_id', default_value=name + '/world'),
+        DeclareLaunchArgument('frame_id', default_value='map'),
         DeclareLaunchArgument('base_frame_id', default_value=name + '/os_sensor'),
         DeclareLaunchArgument('height_map', default_value='True'),
         DeclareLaunchArgument('colored_map', default_value='True'),
@@ -48,6 +49,7 @@ def generate_launch_description():
                          'frame_id': LaunchConfiguration('frame_id'),
                          'base_frame_id': LaunchConfiguration('base_frame_id'),
                          'height_map': LaunchConfiguration('height_map'),
+                         'octomap_path': LaunchConfiguration('map_path'),
                          'colored_map': LaunchConfiguration('colored_map'),
                          'color_factor': LaunchConfiguration('color_factor'),
                          'filter_ground': LaunchConfiguration('filter_ground'),

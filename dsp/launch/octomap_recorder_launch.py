@@ -41,7 +41,7 @@ def generate_launch_description():
         DeclareLaunchArgument('publish_free_space', default_value='False'),
         Node(
             package='octomap_server',
-            namespace=name,
+            #namespace=name,
             executable='octomap_server_node',
             output='screen',
             remappings=[('cloud_in', LaunchConfiguration('input_cloud_topic'))],

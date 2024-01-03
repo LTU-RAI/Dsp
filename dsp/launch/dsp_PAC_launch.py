@@ -10,7 +10,7 @@ def generate_launch_description():
         Node(
             package='dsp',
             namespace=name_space,
-            executable='dsp',
+            #executable='dsp',
             name=name_space + '_dsp',
             parameters=[
                 Parameter("base_link_frame_id", name_space + "/body"),

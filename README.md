@@ -45,7 +45,7 @@ Observe that the pose has to be inside the map.
 ### Published 
 * `/dsp/occupancy_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz used for debugging. Can display different occupancy statuses of voxels in the map by changing the publisher in `dsp.cpp`.
 * `/dsp/path`: [nav_msgs::Path] The generated path from start to goal.
-* `/dsp/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoint
+* `/dsp/splinepath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoint
 
 
 ## Parameters

@@ -250,7 +250,7 @@ void Dsp::buildGDSP(std::shared_ptr<octomap::OcTree> tree)
 
 void Dsp::buildGraph(){
     RCLCPP_INFO(this->get_logger(), "Building search graph...");
-    int size = length_voxel * width_voxel * height_voxel;
+    //int size = length_voxel * width_voxel * height_voxel;
     grid_.reset(new dsl::Grid3d(length_voxel, width_voxel, height_voxel, 
         occupancy_map.get(),
         1, 1, 1, 1, DSP_OCCUPIED + 1));
@@ -467,7 +467,7 @@ void Dsp::request_cost(const std::shared_ptr<dsp_interfaces::srv::PathCost::Requ
 float Dsp::path_distance(const nav_msgs::msg::Path path)
 {
     float distance = 0.0;
-    for(int i = 0; i + 1 < path.poses.size(); i++)
+    for(unsigned long int i = 0; i + 1 < path.poses.size(); i++)
     {
         distance += point_distance(path.poses[i].pose.position, path.poses[i+1].pose.position);
     }
@@ -626,7 +626,7 @@ void Dsp::publishAllPaths()
 nav_msgs::msg::Path Dsp::dspPathToRosMsg(const dsl::GridPath<3> &dsp_path, bool isSplined)
 {
   std::vector<Eigen::Vector3d> path;
-  for(int i = 0; i < dsp_path.cells.size(); i++)
+  for(unsigned long int i = 0; i < dsp_path.cells.size(); i++)
   {
     path.push_back(dsp_path.cells[i].c * res_octomap);
   }
@@ -639,7 +639,7 @@ nav_msgs::msg::Path Dsp::dspPathToRosMsg(const std::vector<Eigen::Vector3d> &dsp
   
   msg.header.frame_id = this->get_parameter("odom_frame_id").get_parameter_value().get<std::string>(); 
   msg.poses.resize(dsp_path.size());
-  for(int i = 0; i < dsp_path.size(); i++)
+  for(unsigned long int i = 0; i < dsp_path.size(); i++)
   {
     if(isSplined){
         msg.poses[i].pose.position.x = dsp_path[i][0] * res_octomap + pmin(0);
@@ -673,7 +673,7 @@ void Dsp::publishOccupancyGrid()
             for(double z = 0; z < height_voxel; z++)
             {
                 Eigen::Vector3d pos(x, y, z);
-                int idx = x + y*length + z*length*width;
+                //int idx = x + y*length + z*length*width;
 
                 // Different parts to vizulize
                 if(gdsl_->GetCost(pos) == DSP_OCCUPIED)

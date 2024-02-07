@@ -5,12 +5,15 @@ from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 import os
+from ament_index_python.packages import get_package_share_directory
 
 name = os.getlogin()
 
 def generate_launch_description():
+    map_dir = get_package_share_directory('robotics_for_all_BT_sim')
     return LaunchDescription([
-        DeclareLaunchArgument('map_path', default_value='/home/r0006e/colcon_ws/src/R0006E-Robotics-for-all-behavior-tree/maps/octomap_robotics.ot'),
+        #DeclareLaunchArgument('map_path', default_value='/home/r0006e/colcon_ws/src/R0006E-Robotics-for-all-behavior-tree/maps/octomap_robotics.ot'),
+        DeclareLaunchArgument('map_path', default_value=os.path.join(map_dir, 'maps', 'octomap_robotics.ot')),
         DeclareLaunchArgument('input_cloud_topic', default_value='/os_cloud_node/points'),
         DeclareLaunchArgument('resolution', default_value='0.5'),
         DeclareLaunchArgument('frame_id', default_value='map'),

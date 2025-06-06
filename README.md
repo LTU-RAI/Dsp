@@ -1,6 +1,8 @@
-# DSP: D*+ path planner on a uniformly spaced 3D or 2D grid integrated with Octomap and cartographer
+# DSP: D*+ path planner on a uniformly spaced 3D or 2D grid integrated with Octomap and nav_msgs/OccupancyGrid
 
 This is an implementation of D*+ on a uniformly spaced 3D or 2D grid for use in global path planning. The user can specify start and goal positions by publishing to the relevant topics, and the generated paths will be published by the node.
+
+This branch is for ROS 2, for ROS 1 see brand ROS 1.
 
 # 1 Installation
 
@@ -15,23 +17,21 @@ Install the dsl library
     cmake ..
     sudo make install
 ```
-We tested DSP on Ubuntu 18.04 and 20.04 thuse ROS melodic and noetic.
 
-
-In your ROS package path, clone the repository:
+In your ROS workspace, clone the repository:
 ```
     git clone https://github.com/LTU-RAI/Dsp.git
 ```
 
-Build Dsp `catkin build` from your catkin work space.
+Build Dsp `colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release` from your workspace. It is recomended to build in Relese mode.
 
 ## Quickstart / Minimal Setup
-To use DSL with octomap in gazebo set `frame_id` and `cloud_in` to the map frame used and point-cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsp_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsp/path_to_pose.py`.
+To use DSL with octomap in gazebo, set `frame_id` and `cloud_in` to the map frame used and point cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsp_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsp/path_to_pose.py`.
 The run:
 ```
 roslaunch dsp dsp_3d_start.launch
 ```
-and publich the gole pose to `/dsp/set_goal`.
+and publish the goal pose to `/dsp/set_goal`.
 Observe that the pose has to be inside the map.
 
 

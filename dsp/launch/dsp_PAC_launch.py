@@ -2,10 +2,11 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import Parameter
 import os
+import getpass
 
 
 def generate_launch_description():
-    name_space = os.getlogin()
+    name_space = getpass.getuser()
     return LaunchDescription([
         Node(
             package='dsp',

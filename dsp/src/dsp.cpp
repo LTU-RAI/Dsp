@@ -60,7 +60,7 @@ Dsp::Dsp() : Node("dsp")
 
 
 
-    cost_srv_ = this->create_service<dsp_interfaces::srv::PathCost>("dsp/path_cost", 
+    cost_srv_ = this->create_service<dsp_interfaces::srv::PathCost>("/dsp/path_cost", 
     //&Dsp::request_cost, this);
     std::bind(&Dsp::request_cost, this, std::placeholders::_1, std::placeholders::_2));
 

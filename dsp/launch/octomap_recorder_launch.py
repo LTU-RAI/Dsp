@@ -5,9 +5,10 @@ from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 import os
+import getpass
 from ament_index_python.packages import get_package_share_directory
 
-name = os.getlogin()
+name = getpass.getuser()
 
 def generate_launch_description():
     map_dir = get_package_share_directory('robotics_for_all_BT_sim')

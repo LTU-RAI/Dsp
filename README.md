@@ -26,26 +26,38 @@ In your ROS workspace, clone the repository:
 Build Dsp `colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release` from your workspace. It is recomended to build in Relese mode.
 
 ## Quickstart / Minimal Setup
-To use DSL with octomap in gazebo, set `frame_id` and `cloud_in` to the map frame used and point cloud you use in `launch/octomap_gazebo.launch`, make sure you have `tf` configured between the map frame and your odometry. And in dsp_grid3d_gazebo set `odom_topic` to your odometry. And finally, change the odometry topic and position reference topic to match your drone's odometry and controller in `src/dsp/path_to_pose.py`.
+To run DSP, `edit dsp_launch.py` so parameters:
+
+* `map_topic` aligns with the topic the map is published on.
+* `use_3d` to `True` if you are using an octomap (3d map, `False` for 2D).
+* `odom_trame_id` is the `TF` frame you have the odometry in.
+* `base_link_frame_id` is the `base_link` frame for the robot.
+  
 The run:
 ```
-roslaunch dsp dsp_3d_start.launch
+ros2 launch dsp dsp_launch.py
 ```
-and publish the goal pose to `/dsp/set_goal`.
-Observe that the pose has to be inside the map.
 
+and publish the goal pose to `/dsp/set_goal`.
+Note that the pose must be within the map.
+
+### Pre requierments
+You need to publish a map of either `octomap_msg::msg::Octomap` (3D) or `nav_msgs::msg::OccupancyGrid` (2D). You also need to publish the robots `TF`.
+
+### Post requirements
+DSP publishes the path as a `nav_msgs::msg::Path` msg, default topic `dsp/path`, and a splined version on `dsp/spline_path`. To follow this, you need a path following node that takes the path and publishes the next waypoint in the path to the controller (that you also need).
 
 ## Topics
 ### Subscribed
-* `/dsp/set_start`: [geometry_msgs::Point] Used to set the start position.
-* `/dsp/set_start`: [geometry_msgs::Point] Used to set the goal position.
-* `/octomap_full`: [octomap_msgs::Octomap] Use for 3D map.
-* `/map`: [nav_msgs::OccupancyGrid] Used for 2D map.
+* `/dsp/set_start`: [geometry_msgs::msg::Point] Used to set the start position. (redundant)
+* `/dsp/set_start`: [geometry_msgs::msg::Point] Used to set the goal position.
+* `/octomap_full`: [octomap_msgs::msg::Octomap] Use for 3D map.
+* `/map`: [nav_msgs::msg::OccupancyGrid] Used for 2D map.
 
 ### Published 
-* `/dsp/occupancy_map`: [visualization_msgs::Marker] A marker for the occupancy grid to be displayed in Rviz used for debugging. Can display different occupancy statuses of voxels in the map by changing the publisher in `dsp.cpp`.
-* `/dsp/path`: [nav_msgs::Path] The generated path from start to goal.
-* `/dsp/optpath`: [nav_msgs::Path] An optimized version of the path which removes unnecessary waypoint
+* `/dsp/occupancy_map`: [visualization_msgs::msg::Marker] A marker for the occupancy grid to be displayed in Rviz used for debugging. Can display different occupancy statuses of voxels in the map by changing the publisher in `dsp.cpp`.
+* `/dsp/path`: [nav_msgs::msg::Path] The generated path from start to goal.
+* `/dsp/spline_path`: [nav_msgs::msg::Path] A smooth path with extra waypoints between existing waypoints to avoid sharp angles in the path.
 
 
 ## Parameters
@@ -55,7 +67,8 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 * `lower_thresh`: [int] Limit for free space in 2D map.
 * `upper_thresh`: [int] Limit for occupied space in 2D map.
 * `risk`: [int] the amount of voxels next to occupied spaced that is risk area.
-* `use_gazebo_odom`: [bool] True if using odom to start planing from.
+* `RATE`: [double] the delay in ms between the path is updated.
+* `use_gazebo_odom`: [bool] True if using odom to start planing from. (redundant)
 * `use_3d`: [bool] True if using 3D planning.
 * `odom_topic`: [string] Topic for odom.
 * `odom_frame_id`: [string] Frame to plan in.

@@ -64,12 +64,17 @@ The user must specify either a mesh to load or the size of the occupancy grid.  
 # Paper
 Thank you for citing the [$D^*_{+}$ paper](https://arxiv.org/abs/2112.05563),if you use the $D^*_{+}$ paht planner in your work
 ```
-@misc{karlsson2021d,
-      title={$D^*_{+}$: A Generic Platform-Agnostic and Risk-Aware Path Planing Framework with an Expandable Grid}, 
-      author={Samuel Karlsson and Anton Koval and Christoforos Kanellakis and Ali-akbar Agha-mohammadi and George Nikolakopoulos},
-      year={2021},
-      eprint={2112.05563},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO}
+@article{KARLSSON2023119408,
+title = {D+∗: A risk aware platform agnostic heterogeneous path planner},
+journal = {Expert Systems with Applications},
+volume = {215},
+pages = {119408},
+year = {2023},
+issn = {0957-4174},
+doi = {https://doi.org/10.1016/j.eswa.2022.119408},
+url = {https://www.sciencedirect.com/science/article/pii/S0957417422024277},
+author = {Samuel Karlsson and Anton Koval and Christoforos Kanellakis and George Nikolakopoulos},
+keywords = {DSP, Path planing, Risk aware, Platform agnostic},
+abstract = {This article establishes the novel D+∗, a risk-aware and platform-agnostic heterogeneous global path planner for robotic navigation in complex environments. The proposed planner addresses a fundamental bottleneck of occupancy-based path planners related to their dependency on accurate and dense maps. More specifically, their performance is highly affected by poorly reconstructed or sparse areas (e.g. holes in the walls or ceilings) leading to faulty generated paths outside the physical boundaries of the 3-dimensional space. As it will be presented, D+∗ addresses this challenge with three novel contributions, integrated into one solution, namely: (a) the proximity risk, (b) the modeling of the unknown space, and (c) the map updates. By adding a risk layer to spaces that are closer to the occupied ones, some holes are filled, and thus the problematic short-cutting through them to the final goal is prevented. The novel established D+∗ also provides safety marginals to the walls and other obstacles, a property that results in paths that do not cut the corners that could potentially disrupt the platform operation. D+∗ has also the capability to model the unknown space as risk-free areas that should keep the paths inside, e.g in a tunnel environment, and thus heavily reducing the risk of larger shortcuts through openings in the walls. D+∗ is also introducing a dynamic map handling capability that continuously updates with the latest information acquired during the map building process, allowing the planner to use constant map growth and resolve cases of planning over outdated sparser map reconstructions. The proposed path planner is also capable to plan 2D and 3D paths by only changing the input map to a 2D or 3D map and it is independent of the dynamics of the robotic platform. The efficiency of the proposed scheme is experimentally evaluated in multiple real-life experiments where D+∗ is producing successfully proper planned paths, either in 2D in the use case of the Boston dynamics Spot robot or 3D paths in the case of an unmanned areal vehicle in varying and challenging scenarios.}
 }
 ```

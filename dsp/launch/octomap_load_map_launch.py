@@ -11,7 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 name = getpass.getuser()
 
 def generate_launch_description():
-    map_dir = get_package_share_directory('robotics_for_all_BT_sim')
+    map_dir = get_package_share_directory('dsp')
     return LaunchDescription([
         #DeclareLaunchArgument('map_path', default_value=map_dir + '/maps/octomap_robotics.ot'),
         DeclareLaunchArgument('map_path', default_value=os.path.join(map_dir, 'maps', 'octomap_robotics.ot')),

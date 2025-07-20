@@ -21,6 +21,7 @@ Dsp::Dsp() : Node("dsp")
     this->declare_parameter("update_rate", 1);
     this->declare_parameter("debug", false);
 
+    spline_step_ = this->get_parameter("spline_step").get_parameter_value().get<double>();
 
 
     occ_map_viz_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("dsp/occupancy_map",1);
@@ -608,18 +609,18 @@ void Dsp::pathUpdateCallback(){
 void Dsp::planAllPaths()
 {
     gdsl_->Plan(path_);
-    //gdsl_->SplinePath(path_, splinepath_, spline_step_);
+    gdsl_->SplinePath(path_, splinepath_, spline_step_);
     return;
 }
 
 void Dsp::publishAllPaths()
 {
   path_pub_->publish(dspPathToRosMsg(path_, false));
-  //if (path_.cells.size() <= 3){
-  //  splinepath_pub_.publish(dspPathToRosMsg(path_, false)); 
-  //} else {
-  //  splinepath_pub_.publish(dspPathToRosMsg(splinepath_, true)); 
-  //}
+  if (path_.cells.size() <= 3){
+    splinepath_pub_->publish(dspPathToRosMsg(path_, false)); 
+  } else {
+    splinepath_pub_->publish(dspPathToRosMsg(splinepath_, true)); 
+  }
 }
 
 // transfom paht to ros paht

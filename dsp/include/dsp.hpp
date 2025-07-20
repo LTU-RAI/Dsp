@@ -105,6 +105,7 @@ private:
     double width = -1.0;
     double height = -1.0;
     double res_octomap;
+    double spline_step_;
     
     Eigen::Vector3d start_pos;
     Eigen::Vector3d goal_pos;
